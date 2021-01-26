@@ -2,6 +2,7 @@ import { Graph } from "./Graph";
 import { automataRun } from "./runner";
 import { automataValidate } from "./validate";
 import { test } from "./test";
+import { parseTable } from "./parser";
 
 /**
  * Represents an automata.
@@ -29,4 +30,5 @@ export const Automata = {
 	validate: automataValidate,
 	run: automataRun,
 	test,
+	parseTable,
 };
