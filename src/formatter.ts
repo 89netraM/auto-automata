@@ -1,6 +1,6 @@
 import { Automata } from "./Automata";
 
-export function formatTable(a: Automata): string {
+export function formatTable(a: Readonly<Automata>): string {
 	return [
 		`\t\t${[...a.alphabet].join("\t")}`,
 		...Object.entries(a.states).map(

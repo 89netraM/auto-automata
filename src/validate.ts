@@ -11,7 +11,7 @@ export interface ValidatorError {
  * alphabet. Returns `true` or a string describing the error.
  * @param a The automata.
  */
-export function automataValidate(a: Automata): boolean | Array<ValidatorError> {
+export function automataValidate(a: Readonly<Automata>): boolean | Array<ValidatorError> {
 	const errors = new Array<ValidatorError>();
 
 	if (!(a.starting in a.states)) {
