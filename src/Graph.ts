@@ -7,9 +7,13 @@ const Epsilon = "ε";
  * Use {@link Graph.Epsilon} to represent the ε column.
  */
 export interface Graph {
-	[stateName: string]: {
-		[symbol: string]: Array<string>;
-		[Epsilon]?: Array<string>;
+	start: string;
+	accepting: Set<string>;
+	states: {
+		[stateName: string]: {
+			[symbol: string]: Set<string>;
+			[Epsilon]?: Set<string>;
+		};
 	};
 }
 
