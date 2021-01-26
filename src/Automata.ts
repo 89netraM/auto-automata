@@ -1,6 +1,7 @@
 import { Graph } from "./Graph";
 import { automataRun } from "./runner";
 import { automataValidate } from "./validate";
+import { test } from "./test";
 
 /**
  * Represents an automata.
@@ -27,4 +28,5 @@ export interface Automata {
 export const Automata = {
 	validate: automataValidate,
 	run: automataRun,
+	test,
 };
