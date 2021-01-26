@@ -3,6 +3,7 @@ import { automataRun } from "./runner";
 import { automataValidate } from "./validate";
 import { test } from "./test";
 import { parseTable } from "./parser";
+import { formatTable } from "./formatter";
 
 /**
  * Represents an automata.
@@ -31,4 +32,5 @@ export const Automata = {
 	run: automataRun,
 	test,
 	parseTable,
+	formatTable,
 };
