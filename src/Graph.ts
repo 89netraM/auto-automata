@@ -1,5 +1,5 @@
 import { graphValidate } from "./validate";
-import { step, run } from "./runner";
+import { step, graphRun } from "./runner";
 
 const Epsilon = "ε";
 
@@ -22,5 +22,6 @@ export const Graph = {
 
 	validate: graphValidate,
 	step,
-	run,
+	run: graphRun,
 };
+Object.defineProperty(Graph, "run", { enumerable: true, get: () => graphRun });

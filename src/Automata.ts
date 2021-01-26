@@ -1,4 +1,5 @@
 import { Graph } from "./Graph";
+import { automataRun } from "./runner";
 import { automataValidate } from "./validate";
 
 /**
@@ -25,4 +26,5 @@ export interface Automata {
 
 export const Automata = {
 	validate: automataValidate,
+	run: automataRun,
 };

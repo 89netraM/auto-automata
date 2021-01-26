@@ -1,3 +1,4 @@
+import { Automata } from "./Automata";
 import { Graph } from "./Graph";
 
 /**
@@ -33,7 +34,7 @@ export function step(g: Readonly<Graph>, current: string, symbol: string): Set<s
  * @param start  The starting state.
  * @param string The string.
  */
-export function run(g: Readonly<Graph>, start: string, string: string): Set<string> {
+export function graphRun(g: Readonly<Graph>, start: string, string: string): Set<string> {
 	if (string.length === 0) {
 		return new Set<string>([start]);
 	}
@@ -44,8 +45,29 @@ export function run(g: Readonly<Graph>, start: string, string: string): Set<stri
 		const nextStates = step(g, start, s);
 		const finalStates = new Set<string>();
 		for (const state of nextStates) {
-			run(g, state, rest).forEach(s => finalStates.add(s));
+			graphRun(g, state, rest).forEach(s => finalStates.add(s));
 		}
 		return finalStates;
 	}
+}
+
+/**
+ * Runs the automata from start with the provided string. Returns the state(s)
+ * it's left in.
+ * @param a      The automata.
+ * @param string The string.
+ */
+export function automataRun(a: Readonly<Automata>, string: string): Set<string>;
+/**
+ * Runs the automata from the provided starting state with the provided string.
+ * Returns the state(s) it's left in.
+ * @param a             The automata.
+ * @param startingState The starting state.
+ * @param string        The string.
+ */
+export function automataRun(a: Readonly<Automata>, startingState: string, string: string): Set<string>;
+export function automataRun(a: Readonly<Automata>, startingOrString: string, string?: string): Set<string> {
+	let starting: string;
+	[starting, string] = string == null ? [a.starting, startingOrString] : [startingOrString, string];
+	return graphRun(a.states, starting, string);
 }
