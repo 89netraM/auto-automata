@@ -4,6 +4,7 @@ import { automataValidate } from "./validate";
 import { test } from "./test";
 import { parseTable } from "./parser";
 import { formatTable } from "./formatter";
+import { constructSubset } from "./construction";
 
 /**
  * Represents an automata.
@@ -33,4 +34,5 @@ export const Automata = {
 	test,
 	parseTable,
 	formatTable,
+	constructSubset,
 };

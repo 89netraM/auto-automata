@@ -2,6 +2,7 @@ import { graphValidate } from "./validate";
 import { step, graphRun, epsilonClosure } from "./runner";
 
 const Epsilon = "ε";
+const Empty = "∅";
 
 /**
  * A transition diagram for a DFA, NFA, or ε-NFA.
@@ -19,11 +20,16 @@ export const Graph = {
 	 * Use to represent a non-consuming state transition.
 	 */
 	Epsilon,
+	/**
+	 * Used to represent the "empty" (∅) state.
+	 */
+	Empty,
 
 	validate: graphValidate,
-	step,
+	step: step,
 	run: graphRun,
 	epsilonClosure: epsilonClosure,
 };
+Object.defineProperty(Graph, "step", { enumerable: true, get: () => step });
 Object.defineProperty(Graph, "run", { enumerable: true, get: () => graphRun });
 Object.defineProperty(Graph, "epsilonClosure", { enumerable: true, get: () => epsilonClosure });

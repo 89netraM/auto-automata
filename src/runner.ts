@@ -39,6 +39,7 @@ export function epsilonClosure(g: Readonly<Graph>, start: string): Set<string>;
  * @param startSet The set of starting states.
  */
 export function epsilonClosure(g: Readonly<Graph>, startSet: ReadonlySet<string>): Set<string>;
+export function epsilonClosure(g: Readonly<Graph>, start: string | ReadonlySet<string>): Set<string>;
 export function epsilonClosure(g: Readonly<Graph>, start: string | ReadonlySet<string>): Set<string> {
 	if (typeof start === "string") {
 		const nextStates = new Set<string>([ start ]);
