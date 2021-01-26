@@ -13,11 +13,11 @@ export function step(g: Readonly<Graph>, current: string, symbol: string): Set<s
 		const nextStates = new Set<string>();
 
 		if (symbol in g[current]) {
-			g[current][symbol].forEach(s => nextStates.add(s));
+			g[current][symbol].forEach(s => epsilonStep(g, s).forEach(s => nextStates.add(s)));
 		}
 
 		if (Graph.Epsilon in g[current]) {
-			g[current][Graph.Epsilon].forEach(s => step(g, s, symbol).forEach(s => nextStates.add(s)));
+			g[current][Graph.Epsilon].forEach(s => step(g, s, symbol).forEach(s => epsilonStep(g, s).forEach(s => nextStates.add(s))));
 		}
 
 		return nextStates;
@@ -25,6 +25,16 @@ export function step(g: Readonly<Graph>, current: string, symbol: string): Set<s
 	else {
 		throw new Error(`the current state "${current}" is not part of the graph`);
 	}
+}
+
+function epsilonStep(g: Readonly<Graph>, current: string): Set<string> {
+	const nextStates = new Set<string>([ current ]);
+
+	if (Graph.Epsilon in g[current]) {
+		g[current][Graph.Epsilon].forEach(s => epsilonStep(g, s).forEach(s => nextStates.add(s)));
+	}
+
+	return nextStates;
 }
 
 /**
