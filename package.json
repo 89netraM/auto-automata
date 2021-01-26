@@ -1,0 +1,14 @@
+{
+	"name": "auto-automata",
+	"version": "0.0.1",
+	"author": "Mårten Åsberg",
+	"license": "MIT",
+	"main": "./dist/index.js",
+	"scripts": {
+		"build": "tsc"
+	},
+	"devDependencies": {
+		"ts-node": "^9.1.1",
+		"typescript": "^4.1.3"
+	}
+}
