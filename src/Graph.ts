@@ -1,4 +1,5 @@
 import { validate } from "./validate";
+import { step, run } from "./runner";
 
 const Epsilon = "ε";
 
@@ -24,4 +25,6 @@ export const Graph = {
 	Epsilon,
 
 	validate,
+	step,
+	run,
 };
