@@ -1,20 +1,16 @@
-import { validate } from "./validate";
+import { graphValidate } from "./validate";
 import { step, run } from "./runner";
 
 const Epsilon = "ε";
 
 /**
- * Can be used to represent DFA, NFA, or ε-NFA. Built as a transition diagram.
+ * A transition diagram for a DFA, NFA, or ε-NFA.
  * Use {@link Graph.Epsilon} to represent the ε column.
  */
 export interface Graph {
-	start: string;
-	accepting: Set<string>;
-	states: {
-		[stateName: string]: {
-			[symbol: string]: Set<string>;
-			[Epsilon]?: Set<string>;
-		};
+	[stateName: string]: {
+		[symbol: string]: Set<string>;
+		[Epsilon]?: Set<string>;
 	};
 }
 
@@ -24,7 +20,7 @@ export const Graph = {
 	 */
 	Epsilon,
 
-	validate,
+	validate: graphValidate,
 	step,
 	run,
 };

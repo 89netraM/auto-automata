@@ -8,15 +8,15 @@ import { Graph } from "./Graph";
  * @param symbol  The symbol.
  */
 export function step(g: Readonly<Graph>, current: string, symbol: string): Set<string> {
-	if (current in g.states) {
+	if (current in g) {
 		const nextStates = new Set<string>();
 
-		if (symbol in g.states[current]) {
-			g.states[current][symbol].forEach(s => nextStates.add(s));
+		if (symbol in g[current]) {
+			g[current][symbol].forEach(s => nextStates.add(s));
 		}
 
-		if (Graph.Epsilon in g.states[current]) {
-			g.states[current][Graph.Epsilon].forEach(s => step(g, s, symbol).forEach(s => nextStates.add(s)));
+		if (Graph.Epsilon in g[current]) {
+			g[current][Graph.Epsilon].forEach(s => step(g, s, symbol).forEach(s => nextStates.add(s)));
 		}
 
 		return nextStates;
