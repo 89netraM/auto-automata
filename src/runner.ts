@@ -13,11 +13,11 @@ export function step(g: Readonly<Graph>, current: string, symbol: string): Set<s
 		const nextStates = new Set<string>();
 
 		if (symbol in g[current]) {
-			g[current][symbol].forEach(s => epsilonStep(g, s).forEach(s => nextStates.add(s)));
+			g[current][symbol].forEach(s => epsilonClosure(g, s).forEach(s => nextStates.add(s)));
 		}
 
 		if (Graph.Epsilon in g[current]) {
-			g[current][Graph.Epsilon].forEach(s => step(g, s, symbol).forEach(s => epsilonStep(g, s).forEach(s => nextStates.add(s))));
+			g[current][Graph.Epsilon].forEach(s => step(g, s, symbol).forEach(s => epsilonClosure(g, s).forEach(s => nextStates.add(s))));
 		}
 
 		return nextStates;
@@ -27,14 +27,37 @@ export function step(g: Readonly<Graph>, current: string, symbol: string): Set<s
 	}
 }
 
-function epsilonStep(g: Readonly<Graph>, current: string): Set<string> {
-	const nextStates = new Set<string>([ current ]);
+/**
+ * Returns all states reachable by only following ε-transitions.
+ * @param g     The graph.
+ * @param start The starting state.
+ */
+export function epsilonClosure(g: Readonly<Graph>, start: string): Set<string>;
+/**
+ * Returns all states reachable by only following ε-transitions.
+ * @param g        The graph.
+ * @param startSet The set of starting states.
+ */
+export function epsilonClosure(g: Readonly<Graph>, startSet: ReadonlySet<string>): Set<string>;
+export function epsilonClosure(g: Readonly<Graph>, start: string | ReadonlySet<string>): Set<string> {
+	if (typeof start === "string") {
+		const nextStates = new Set<string>([ start ]);
 
-	if (Graph.Epsilon in g[current]) {
-		g[current][Graph.Epsilon].forEach(s => epsilonStep(g, s).forEach(s => nextStates.add(s)));
+		if (Graph.Epsilon in g[start]) {
+			g[start][Graph.Epsilon].forEach(s => epsilonClosure(g, s).forEach(s => nextStates.add(s)));
+		}
+
+		return nextStates;
 	}
+	else {
+		const nextStates = new Set<string>();
 
-	return nextStates;
+		for (const state of start) {
+			epsilonClosure(g, state).forEach(s => nextStates.add(s));
+		}
+
+		return nextStates;
+	}
 }
 
 /**
