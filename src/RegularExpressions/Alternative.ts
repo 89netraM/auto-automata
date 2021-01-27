@@ -114,10 +114,25 @@ export class Alternative extends RegularExpression {
 	}
 
 	public equals(other: RegularExpression): boolean {
-		return other instanceof Alternative &&
-			// e₁ + e₂ = e₁ + e₂
-			((this.left.equals(other.left) && this.right.equals(other.right)) ||
-				// e₁ + e₂ = e₂ + e₁
-				(this.left.equals(other.right) && this.right.equals(other.left)));
+		if (other instanceof Alternative) {
+			const thiss = this.flat();
+			const others = other.flat();
+			// ∀s∈e₁. s∈e₂
+			for (const t of thiss) {
+				if (!others.some(o => t.equals(o))) {
+					return false;
+				}
+			}
+			// ∀s∈e₂. s∈e₁
+			for (const o of others) {
+				if (!thiss.some(t => o.equals(t))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }
