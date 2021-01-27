@@ -1,3 +1,5 @@
+import { Nil } from "./Nil";
+import { Empty } from "./Empty";
 import { RegularExpression } from "./RegularExpression";
 
 export class Star extends RegularExpression {
@@ -15,9 +17,21 @@ export class Star extends RegularExpression {
 	}
 
 	public simplify(): RegularExpression {
-		return new Star(
-			this.exp.simplify(),
-		);
+		const exp = this.exp.simplify();
+		// ∅* = ε
+		// ε* = ε
+		if (exp.equals(Empty.Instance) || exp.equals(Nil.Instance)) {
+			return Nil.Instance;
+		}
+		// (e*)* = e*
+		else if (exp instanceof Star) {
+			return exp;
+		}
+		else {
+			return new Star(
+				exp,
+			);
+		}
 	}
 
 	public run(string: string): Array<string> {
