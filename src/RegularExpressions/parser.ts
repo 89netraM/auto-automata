@@ -33,6 +33,9 @@ function parseAlternative(text: string): [RegularExpression, string] {
 	if (text.length === 0) {
 		return [exp2, text];
 	}
+	if (text.endsWith("(")) {
+		return [exp2, text.substring(0, text.length - 1)];
+	}
 
 	if (text.endsWith(Alternative.Character)) {
 		text = text.substring(0, text.length - 1);
@@ -98,7 +101,7 @@ function parseSequence(text: string): [RegularExpression, string] {
 		return [exp2, text];
 	}
 	if (text.endsWith("(")) {
-		return [exp2, text.substring(0, text.length - 1)];
+		return [exp2, text];
 	}
 
 	let exp1: RegularExpression;
