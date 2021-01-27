@@ -15,6 +15,8 @@ export class Reference extends RegularExpression {
 		return new Array<string>();
 	}
 
+	public traverse(visitor: (e: RegularExpression) => void): void { }
+
 	public equals(other: RegularExpression): boolean {
 		return other instanceof Reference &&
 			// e = e

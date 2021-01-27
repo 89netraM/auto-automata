@@ -42,6 +42,10 @@ export class Star extends RegularExpression {
 		);
 	}
 
+	public traverse(visitor: (e: RegularExpression) => void): void {
+		visitor(this.exp);
+	}
+
 	public equals(other: RegularExpression): boolean {
 		return other instanceof Star &&
 			// e* = e*

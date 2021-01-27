@@ -15,6 +15,22 @@ export class Alternative extends RegularExpression {
 		super();
 	}
 
+	public flat(): Array<RegularExpression> {
+		const exps = new Array<RegularExpression>();
+
+		const visitor = (exp: RegularExpression): void => {
+			if (exp instanceof Alternative) {
+				exp.traverse(visitor);
+			}
+			else {
+				exps.push(exp);
+			}
+		};
+		this.traverse(visitor);
+
+		return exps;
+	}
+
 	private contains(other: RegularExpression): boolean {
 		return this.left.equals(other) || this.right.equals(other) ||
 			(this.left instanceof Alternative && this.left.contains(other)) ||
@@ -90,6 +106,11 @@ export class Alternative extends RegularExpression {
 		}
 
 		return new Alternative(left, right);
+	}
+
+	public traverse(visitor: (e: RegularExpression) => void): void {
+		visitor(this.left);
+		visitor(this.right);
 	}
 
 	public equals(other: RegularExpression): boolean {

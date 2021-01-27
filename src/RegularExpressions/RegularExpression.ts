@@ -15,6 +15,8 @@ export abstract class RegularExpression {
 		return this;
 	}
 
+	public traverse(visitor: (e: RegularExpression) => void): void { }
+
 	public precedence(): number {
 		return precedence.length - precedence.indexOf((this as any)["constructor"]["name"]);
 	}

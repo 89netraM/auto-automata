@@ -13,6 +13,22 @@ export class Sequence extends RegularExpression {
 		super();
 	}
 
+	public flat(): Array<RegularExpression> {
+		const exps = new Array<RegularExpression>();
+
+		const visitor = (exp: RegularExpression): void => {
+			if (exp instanceof Sequence) {
+				exp.traverse(visitor);
+			}
+			else {
+				exps.push(exp);
+			}
+		};
+		this.traverse(visitor);
+
+		return exps;
+	}
+
 	public format(): string {
 		const left = this.left.precedence() < this.precedence() ? "(" + this.left.format() + ")" : this.left.format();
 		const right = this.right.precedence() <= this.precedence() ? "(" + this.right.format() + ")" : this.right.format();
@@ -65,6 +81,11 @@ export class Sequence extends RegularExpression {
 		}
 
 		return new Sequence(left, right);
+	}
+
+	public traverse(visitor: (e: RegularExpression) => void): void {
+		visitor(this.left);
+		visitor(this.right);
 	}
 
 	public equals(other: RegularExpression): boolean {
