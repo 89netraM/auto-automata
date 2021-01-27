@@ -1,14 +1,15 @@
 import { RegularExpression } from "./RegularExpression";
 
 export class Empty extends RegularExpression {
-	public static Instance: Empty = new Empty();
+	public static readonly Instance: RegularExpression = new Empty();
+	public static readonly Character: string = "∅";
 
 	private constructor() {
 		super();
 	}
 
 	public format(): string {
-		return "∅";
+		return Empty.Character;
 	}
 
 	public equals(other: RegularExpression): boolean {

@@ -5,6 +5,8 @@ import { Sequence } from "./Sequence";
 import { Star } from "./Star";
 
 export class Alternative extends RegularExpression {
+	public static readonly Character: string = "+";
+
 	public constructor(
 		public readonly left: RegularExpression,
 		public readonly right: RegularExpression,
@@ -21,7 +23,7 @@ export class Alternative extends RegularExpression {
 	public format(): string {
 		const left = this.left.precedence() < this.precedence() ? "(" + this.left.format() + ")" : this.left.format();
 		const right = this.right.precedence() <= this.precedence() ? "(" + this.right.format() + ")" : this.right.format();
-		return left + " + " + right;
+		return `${left} ${Alternative.Character} ${right}`;
 	}
 
 	public simplify(): RegularExpression {

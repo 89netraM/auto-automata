@@ -3,6 +3,8 @@ import { Nil } from "./Nil";
 import { RegularExpression } from "./RegularExpression";
 
 export class Sequence extends RegularExpression {
+	public static readonly Character: string = "";
+
 	public constructor(
 		public readonly left: RegularExpression,
 		public readonly right: RegularExpression,
