@@ -12,6 +12,10 @@ export class Empty extends RegularExpression {
 		return Empty.Character;
 	}
 
+	public run(string: string): Array<string> {
+		return new Array<string>();
+	}
+
 	public equals(other: RegularExpression): boolean {
 		// ∅ = ∅
 		return other instanceof Empty;

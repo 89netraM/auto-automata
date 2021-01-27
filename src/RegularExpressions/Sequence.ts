@@ -44,6 +44,15 @@ export class Sequence extends RegularExpression {
 		}
 	}
 
+	public run(string: string): Array<string> {
+		const firsts = this.left.run(string);
+		const result = new Array<string>();
+		for (const rest of firsts) {
+			result.push(...this.right.run(rest));
+		}
+		return result;
+	}
+
 	public replace(name: string, exp: RegularExpression): RegularExpression {
 		let left = this.left.replace(name, exp);
 		let right = this.right.replace(name, exp);

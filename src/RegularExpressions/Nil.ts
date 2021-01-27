@@ -12,6 +12,10 @@ export class Nil extends RegularExpression {
 		return Nil.Character;
 	}
 
+	public run(string: string): Array<string> {
+		return new Array<string>(string);
+	}
+
 	public equals(other: RegularExpression): boolean {
 		// ε = ε
 		return other instanceof Nil;

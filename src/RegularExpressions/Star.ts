@@ -20,6 +20,22 @@ export class Star extends RegularExpression {
 		);
 	}
 
+	public run(string: string): Array<string> {
+		const queue = new Array<string>(string);
+		const seen = new Set<string>(queue);
+		while (queue.length > 0) {
+			const rest = queue.shift();
+			const nexts = this.exp.run(rest);
+			for (const next of nexts) {
+				if (!seen.has(next)) {
+					seen.add(next);
+					queue.push(next);
+				}
+			}
+		}
+		return new Array<string>(...seen);
+	}
+
 	public replace(name: string, exp: RegularExpression): RegularExpression {
 		return new Star(
 			this.exp.replace(name, exp),

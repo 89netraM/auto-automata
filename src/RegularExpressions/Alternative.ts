@@ -74,6 +74,10 @@ export class Alternative extends RegularExpression {
 		}
 	}
 
+	public run(string: string): Array<string> {
+		return this.left.run(string).concat(this.right.run(string));
+	}
+
 	public replace(name: string, exp: RegularExpression): RegularExpression {
 		let left = this.left.replace(name, exp);
 		let right = this.right.replace(name, exp);

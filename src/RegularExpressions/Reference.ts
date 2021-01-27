@@ -11,6 +11,10 @@ export class Reference extends RegularExpression {
 		return this.name;
 	}
 
+	public run(string: string): Array<string> {
+		return new Array<string>();
+	}
+
 	public equals(other: RegularExpression): boolean {
 		return other instanceof Reference &&
 			// e = e
