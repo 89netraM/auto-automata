@@ -20,6 +20,12 @@ export class Star extends RegularExpression {
 		);
 	}
 
+	public replace(name: string, exp: RegularExpression): RegularExpression {
+		return new Star(
+			this.exp.replace(name, exp),
+		);
+	}
+
 	public equals(other: RegularExpression): boolean {
 		return other instanceof Star &&
 			// e* = e*

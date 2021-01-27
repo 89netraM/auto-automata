@@ -1,6 +1,7 @@
 import { Alternative } from "./Alternative";
 import { Empty } from "./Empty";
 import { Nil } from "./Nil";
+import { Reference } from "./Reference";
 import { RegularExpression } from "./RegularExpression";
 import { Sequence } from "./Sequence";
 import { Star } from "./Star";
@@ -72,7 +73,12 @@ function parseSequence(text: string): [RegularExpression, string] {
 	else {
 		const symbolMatch = text.match(lastSymbol);
 		if (symbolMatch != null) {
-			exp2 = new Symbol(symbolMatch[0]);
+			if (symbolMatch[0].length === 1) {
+				exp2 = new Symbol(symbolMatch[0]);
+			}
+			else {
+				exp2 = new Reference(symbolMatch[0]);
+			}
 			text = text.substring(0, text.length - symbolMatch[0].length);
 		}
 		else {

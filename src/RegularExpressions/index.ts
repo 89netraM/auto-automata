@@ -2,6 +2,7 @@ import { Alternative } from "./Alternative";
 import { Empty } from "./Empty";
 import { Nil } from "./Nil";
 import { parse } from "./parser";
+import { Reference } from "./Reference";
 import { RegularExpression } from "./RegularExpression";
 import { Sequence } from "./Sequence";
 import { Star } from "./Star";
@@ -15,6 +16,7 @@ export {
 	emptyInstance as Empty,
 	nilInstance as Nil,
 	parse,
+	Reference,
 	RegularExpression,
 	Sequence,
 	Star,

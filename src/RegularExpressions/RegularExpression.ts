@@ -6,6 +6,10 @@ export abstract class RegularExpression {
 		return this;
 	}
 
+	public replace(name: string, exp: RegularExpression): RegularExpression {
+		return this;
+	}
+
 	public precedence(): number {
 		return precedence.length - precedence.indexOf((this as any)["constructor"]["name"]);
 	}
@@ -17,6 +21,7 @@ export abstract class RegularExpression {
 const precedence = [
 	"Empty",
 	"Nil",
+	"Reference",
 	"Symbol",
 	"Star",
 	"Sequence",

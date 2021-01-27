@@ -1,5 +1,6 @@
 import { Empty } from "./Empty";
 import { Nil } from "./Nil";
+import { Reference } from "./Reference";
 import { RegularExpression } from "./RegularExpression";
 import { Sequence } from "./Sequence";
 import { Star } from "./Star";
@@ -71,6 +72,20 @@ export class Alternative extends RegularExpression {
 		else {
 			return new Alternative(left, right);
 		}
+	}
+
+	public replace(name: string, exp: RegularExpression): RegularExpression {
+		let left = this.left.replace(name, exp);
+		let right = this.right.replace(name, exp);
+
+		if (left instanceof Reference && left.name === name) {
+			left = exp;
+		}
+		if (right instanceof Reference && right.name === name) {
+			right = exp;
+		}
+
+		return new Alternative(left, right);
 	}
 
 	public equals(other: RegularExpression): boolean {
