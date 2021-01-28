@@ -1,4 +1,5 @@
-import { Automata, Graph } from "../";
+import { Automata } from "../Automata";
+import { Graph } from "../Graph";
 import { Alternative } from "./Alternative";
 import { Nil } from "./Nil";
 import { RegularExpression } from "./RegularExpression";
@@ -107,17 +108,17 @@ export function fromAutomata(a: Automata): RegularExpression {
 
 		const selfKey = makeKey(state, state);
 		for (let [fromName, exp] of froms) {
+			expressions.delete(makeKey(fromName, state));
 			if (expressions.has(selfKey)) {
 				exp = new Sequence(exp, new Star(expressions.get(selfKey)));
 			}
 			for (const [thenExp, toName] of tos) {
+				expressions.delete(makeKey(state, toName));
 				insertExpressionEdge(
 					fromName,
 					new Sequence(exp, thenExp),
 					toName,
 				);
-				expressions.delete(makeKey(fromName, state));
-				expressions.delete(makeKey(state, toName));
 			}
 		}
 		expressions.delete(selfKey);
