@@ -1,5 +1,6 @@
 import { Alternative } from "./Alternative";
 import { Empty } from "./Empty";
+import { fromAutomata } from "./from";
 import { Nil } from "./Nil";
 import { parse } from "./parser";
 import { Reference } from "./Reference";
@@ -14,6 +15,7 @@ const nilInstance = Nil.Instance;
 export {
 	Alternative,
 	emptyInstance as Empty,
+	fromAutomata,
 	nilInstance as Nil,
 	parse,
 	Reference,
