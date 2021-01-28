@@ -8,11 +8,33 @@ import { Star } from "./Star";
 export class Alternative extends RegularExpression {
 	public static readonly Character: string = "+";
 
+	public readonly left: RegularExpression;
+	public readonly right: RegularExpression;
+
 	public constructor(
-		public readonly left: RegularExpression,
-		public readonly right: RegularExpression,
-	) {
+		left: RegularExpression,
+		right: RegularExpression,
+	);
+	public constructor(alternatives: ReadonlyArray<RegularExpression>);
+	public constructor(a: RegularExpression | ReadonlyArray<RegularExpression>, b?: RegularExpression) {
 		super();
+		if (a instanceof RegularExpression) {
+			this.left = a;
+			this.right = b;
+		}
+		else {
+			if (a.length < 2) {
+				throw new Error("empty or only one alternatives");
+			}
+			else if (a.length === 2) {
+				this.left = a[0];
+				this.right = a[1];
+			}
+			else {
+				this.left = new Alternative(a.slice(0, a.length - 1));
+				this.right = a[a.length - 1];
+			}
+		}
 	}
 
 	public flat(): Array<RegularExpression> {
@@ -29,6 +51,10 @@ export class Alternative extends RegularExpression {
 		this.traverse(visitor);
 
 		return exps;
+	}
+
+	public hasNilOption(): boolean {
+		return this.flat().some(e => e.equals(Nil.Instance));
 	}
 
 	private contains(other: RegularExpression): boolean {
@@ -66,6 +92,30 @@ export class Alternative extends RegularExpression {
 		// e* + ε = e*
 		else if (left instanceof Star && right.equals(Nil.Instance)) {
 			return left;
+		}
+		// ε + ee* = e*
+		else if (left.equals(Nil.Instance) && right instanceof Sequence && right.right instanceof Star && right.left.equals(right.right.exp)) {
+			return right.right;
+		}
+		// ee* + ε = e*
+		else if (left instanceof Sequence && left.right instanceof Star && left.left.equals(left.right.exp) && right.equals(Nil.Instance)) {
+			return left.right;
+		}
+		// e₁ + e₂e₁ = (ε + e₂)e₁
+		else if (right instanceof Sequence && left.equals(right.right)) {
+			return new Sequence(new Alternative(Nil.Instance, right.left), left);
+		}
+		// e₁e₂ + e₂ = (ε + e₁)e₂
+		else if (left instanceof Sequence && left.right.equals(right)) {
+			return new Sequence(new Alternative(Nil.Instance, left.left), right);
+		}
+		// e₁ + e₁e₂ = e₁(ε + e₂)
+		else if (right instanceof Sequence && left.equals(right.left)) {
+			return new Sequence(left, new Alternative(Nil.Instance, right.right));
+		}
+		// e₁e₂ + e₁ = e₁(ε + e₂)
+		else if (left instanceof Sequence && left.right.equals(right)) {
+			return new Sequence(right, new Alternative(Nil.Instance, left.left));
 		}
 		// e₁e₂ + e₁e₃ = e₁(e₂ + e₃)
 		else if (left instanceof Sequence && right instanceof Sequence && left.left.equals(right.left)) {

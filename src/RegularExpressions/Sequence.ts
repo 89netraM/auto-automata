@@ -2,6 +2,7 @@ import { Empty } from "./Empty";
 import { Nil } from "./Nil";
 import { Reference } from "./Reference";
 import { RegularExpression } from "./RegularExpression";
+import { Star } from "./Star";
 
 export class Sequence extends RegularExpression {
 	public static readonly Character: string = "";
@@ -54,6 +55,10 @@ export class Sequence extends RegularExpression {
 		// e₁(e₂e₃) = (e₁e₂)e₃ = e₁e₂e₃
 		else if (right instanceof Sequence) {
 			return new Sequence(new Sequence(left, right.left).simplify(), right.right).simplify();
+		}
+		// e*e = ee*
+		else if (left instanceof Star && left.exp.equals(right)) {
+			return new Sequence(right, left);
 		}
 		else {
 			return new Sequence(left, right);
