@@ -1,83 +1,133 @@
 import { Automata, Graph } from "../";
 import { Alternative } from "./Alternative";
 import { Nil } from "./Nil";
-import { Reference } from "./Reference";
 import { RegularExpression } from "./RegularExpression";
 import { Sequence } from "./Sequence";
+import { Star } from "./Star";
 import { Symbol } from "./Symbol";
 
-// Steps for the algorithm from http://www.cse.chalmers.se/edu/year/2020/course/TMV028_Automata/lectures/L8.pdf#page=36
+// Steps for the algorithm from http://www.cse.chalmers.se/edu/year/2020/course/TMV028_Automata/lectures/L8.pdf#page=19
+// But this first step is from https://www.geeksforgeeks.org/generating-regular-expression-from-finite-automata/
 
-export function fromAutomata(a: Automata): Map<string, RegularExpression> {
-	const equations = new Map<string, RegularExpression>();
-	for (const stateName in a.states) {
-		const state = a.states[stateName];
-		const transitions = new Map<string, Set<string>>();
+export function fromAutomata(a: Automata): RegularExpression {
+	/**
+	 * Map from state names (from-to) to the expressions that describe the
+	 * transition.
+	 */
+	const expressions = new Map<string, RegularExpression>();
+	/**
+	 * A list of edges.
+	 */
+	let paths = new Array<[string, string]>();
 
-		for (const symbol of [Graph.Epsilon, ...a.alphabet]) {
-			if (symbol in state) {
-				for (const toState of state[symbol]) {
-					const set = transitions.has(toState) ? transitions.get(toState) : new Set<string>();
-					set.add(symbol);
-					transitions.set(toState, set);
+	/**
+	 * Creates a key for accessing the expression of the edge between the two
+	 * states.
+	 * @param from The name of the origin state.
+	 * @param to   The name of the target state.
+	 */
+	const makeKey = (from: string, to: string): string => `${from}-${to}`;
+	/**
+	 * Inserts the given expression into the
+	 * @param from The name of the origin state.
+	 * @param exp  The partial expression for this transition.
+	 * @param to   The name of the target state.
+	 */
+	const insertExpressionEdge = (from: string, exp: RegularExpression, to: string): void => {
+		const key = makeKey(from, to);
+		if (expressions.has(key)) {
+			exp = new Alternative(expressions.get(key), exp);
+		}
+		expressions.set(key, exp);
+		addPath(from, to);
+	};
+
+	/**
+	 * Adds the edge described by the state names to the path list.
+	 * @param from The name of the origin state.
+	 * @param to   The name of the target state.
+	 */
+	const addPath = (from: string, to: string): void => {
+		if (!paths.some(([f, t]) => f === from && t === to)) {
+			paths.push([from, to]);
+		}
+	};
+
+	let startingStateName = "sₛ";
+	while (startingStateName in a.states) {
+		startingStateName += "ₛ";
+	}
+	// From new starting to old starting
+	insertExpressionEdge(
+		startingStateName,
+		Nil.Instance,
+		a.starting,
+	);
+
+	// Add all existing edges
+	for (const fromName in a.states) {
+		for (const path in a.states[fromName]) {
+			const exp = path === Graph.Epsilon ? Nil.Instance : new Symbol(path);
+			for (const toName of a.states[fromName][path]) {
+				if (toName !== Graph.Empty) {
+					insertExpressionEdge(
+						fromName,
+						exp,
+						toName,
+					);
 				}
 			}
 		}
-
-		let equation: RegularExpression = null;
-		if (a.accepting.has(stateName)) {
-			equation = Nil.Instance;
-		}
-		for (const [toState, viaSymbols] of transitions.entries()) {
-			let alts: RegularExpression = null;
-			for (const symbol of viaSymbols) {
-				if (alts == null) {
-					alts = new Symbol(symbol);
-				}
-				else {
-					alts = new Alternative(alts, new Symbol(symbol));
-				}
-			}
-			const seq = new Sequence(alts, new Reference(toState));
-			if (equation == null) {
-				equation = seq;
-			}
-			else {
-				equation = new Alternative(equation, seq);
-			}
-		}
-
-		equations.set(stateName, equation);
 	}
 
-	return equations;
+	let acceptingStateName = "sₐ";
+	while (acceptingStateName in a.states) {
+		acceptingStateName += "ₐ";
+	}
+	// From all old accepting to new accepting
+	for (const stateName of a.accepting) {
+		insertExpressionEdge(
+			stateName,
+			Nil.Instance,
+			acceptingStateName,
+		);
+		addPath(stateName, acceptingStateName);
+	}
+
+	// Eliminate states
+	for (const state in a.states) {
+		const froms: Array<[string, RegularExpression]> = paths
+			.filter(([f, t]) => f !== state && t === state)
+			.map(([f, t]) => [f, expressions.get(makeKey(f, t))]);
+		const tos: Array<[RegularExpression, string]> = paths
+			.filter(([f, t]) => f === state && t !== state)
+			.map(([f, t]) => [expressions.get(makeKey(f, t)), t]);
+
+		paths = paths.filter(([f, t]) => !(f === state || state === t));
+
+		const selfKey = makeKey(state, state);
+		for (let [fromName, exp] of froms) {
+			if (expressions.has(selfKey)) {
+				exp = new Sequence(exp, new Star(expressions.get(selfKey)));
+			}
+			for (const [thenExp, toName] of tos) {
+				insertExpressionEdge(
+					fromName,
+					new Sequence(exp, thenExp),
+					toName,
+				);
+				expressions.delete(makeKey(fromName, state));
+				expressions.delete(makeKey(state, toName));
+			}
+		}
+		expressions.delete(selfKey);
+	}
+
+	const finalKey = makeKey(startingStateName, acceptingStateName);
+	if (expressions.size === 1 && expressions.has(finalKey)) {
+		return expressions.get(finalKey).simplify();
+	}
+	else {
+		return null;
+	}
 }
-
-const a: Automata = {
-	starting: "s₄",
-	accepting: new Set(["s₁", "s₄"]),
-	alphabet: new Set(["a", "b", "c"]),
-	states: {
-		"s₁": {
-			"a": new Set(["s₂", "s₃", "s₄"]),
-			"b": new Set(["s₂"]),
-			"c": new Set(["s₁"]),
-		},
-		"s₂": {
-			"b": new Set(["s₃"]),
-		},
-		"s₃": {
-			"a": new Set(["s₄"]),
-			"c": new Set(["s₃"]),
-			[Graph.Epsilon]: new Set(["s₄"]),
-		},
-		"s₄": {
-			"a": new Set(["s₁"]),
-			"b": new Set(["s₄"]),
-		},
-	},
-};
-
-console.log(
-	[...fromAutomata(a).entries()].map(([name, exp]) => `${name}: ${exp.format()}`).join("\n")
-);
