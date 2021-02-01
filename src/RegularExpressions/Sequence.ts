@@ -137,4 +137,8 @@ export class Sequence extends RegularExpression {
 			// e₁e₂ = e₁e₂
 			this.left.equals(other.left) && this.right.equals(other.right);
 	}
+
+	public isEmpty(): boolean {
+		return this.left.isEmpty() || this.right.isEmpty();
+	}
 }

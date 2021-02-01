@@ -25,4 +25,8 @@ export class Symbol extends RegularExpression {
 			// s = s
 			this.symbol === other.symbol;
 	}
+
+	public isEmpty(): boolean {
+		return false;
+	}
 }

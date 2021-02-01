@@ -83,4 +83,8 @@ export class Star extends RegularExpression {
 			// e* = e*
 			this.exp.equals(other.exp);
 	}
+
+	public isEmpty(): boolean {
+		return false;
+	}
 }

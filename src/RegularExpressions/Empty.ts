@@ -20,4 +20,8 @@ export class Empty extends RegularExpression {
 		// ∅ = ∅
 		return other instanceof Empty;
 	}
+
+	public isEmpty(): boolean {
+		return true;
+	}
 }

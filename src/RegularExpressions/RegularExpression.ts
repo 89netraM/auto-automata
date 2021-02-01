@@ -2,6 +2,7 @@ export abstract class RegularExpression {
 	public abstract format(): string;
 	public abstract run(string: string): Array<string>;
 	public abstract equals(other: RegularExpression): boolean;
+	public abstract isEmpty(): boolean;
 
 	public test(string: string): boolean {
 		return this.run(string).some(r => r.length === 0);

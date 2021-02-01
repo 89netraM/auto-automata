@@ -20,4 +20,8 @@ export class Nil extends RegularExpression {
 		// ε = ε
 		return other instanceof Nil;
 	}
+
+	public isEmpty(): boolean {
+		return false;
+	}
 }

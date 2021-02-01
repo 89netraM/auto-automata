@@ -185,4 +185,8 @@ export class Alternative extends RegularExpression {
 			return false;
 		}
 	}
+
+	public isEmpty(): boolean {
+		return this.left.isEmpty() && this.right.isEmpty();
+	}
 }

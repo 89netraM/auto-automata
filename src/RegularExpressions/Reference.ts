@@ -22,4 +22,8 @@ export class Reference extends RegularExpression {
 			// e = e
 			this.name === other.name;
 	}
+
+	public isEmpty(): boolean {
+		return false;
+	}
 }
