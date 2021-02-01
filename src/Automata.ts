@@ -5,6 +5,7 @@ import { test } from "./test";
 import { parseTable } from "./parser";
 import { formatTable } from "./formatter";
 import { constructSubset } from "./construction";
+import { fromRegularExpression } from "./from";
 
 /**
  * Represents an automata.
@@ -35,4 +36,5 @@ export const Automata = {
 	parseTable,
 	formatTable,
 	constructSubset,
+	fromRegularExpression,
 };
