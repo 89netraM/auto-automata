@@ -58,6 +58,12 @@ function parseSequence(text: string): [RegularExpression, string] {
 	let willBeStar = false;
 	if (text.endsWith(Star.Character)) {
 		willBeStar = true;
+	}
+	let willBePlus = false;
+	if (text.endsWith("+")) {
+		willBePlus = true;
+	}
+	if (willBeStar || willBePlus) {
 		text = text.substring(0, text.length - 1);
 	}
 
@@ -95,6 +101,9 @@ function parseSequence(text: string): [RegularExpression, string] {
 
 	if (willBeStar) {
 		exp2 = new Star(exp2);
+	}
+	if (willBePlus) {
+		exp2 = new Sequence(exp2, new Star(exp2));
 	}
 
 	if (text.length === 0 || text.endsWith(Alternative.Character)) {
