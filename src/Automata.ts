@@ -6,6 +6,7 @@ import { parseTable } from "./parser";
 import { formatTable } from "./formatter";
 import { constructSubset } from "./construction";
 import { fromRegularExpression } from "./from";
+import { isEmpty } from "./emptiness";
 
 /**
  * Represents an automata.
@@ -37,4 +38,5 @@ export const Automata = {
 	formatTable,
 	constructSubset,
 	fromRegularExpression,
+	isEmpty,
 };
