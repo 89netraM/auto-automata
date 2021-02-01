@@ -1,6 +1,8 @@
 import { Nil } from "./Nil";
 import { Empty } from "./Empty";
 import { RegularExpression } from "./RegularExpression";
+import { Sequence } from "./Sequence";
+import { Alternative } from "./Alternative";
 
 export class Star extends RegularExpression {
 	public static readonly Character: string = "*";
@@ -26,6 +28,22 @@ export class Star extends RegularExpression {
 		// (e*)* = e*
 		else if (exp instanceof Star) {
 			return exp;
+		}
+		// (ε + e)* = e*
+		else if (exp instanceof Alternative) {
+			const exceptNil = exp.flat().filter(e => !e.equals(Nil.Instance));
+			if (exceptNil.length === 1) {
+				return new Star(exceptNil[0]);
+			}
+			else {
+				return new Star(new Alternative(exceptNil));
+			}
+		}
+		// (e₁*e₂*)* = (e₁ + e₂)*
+		else if (exp instanceof Sequence && exp.flat().every(e => e instanceof Star)) {
+			return new Star(
+				new Alternative(exp.flat().map(e => (e as Star).exp))
+			).simplify();
 		}
 		else {
 			return new Star(
