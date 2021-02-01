@@ -2,7 +2,7 @@ import { Automata } from "./Automata";
 import { Graph } from "./Graph";
 
 export function parseTable(text: string): Automata | null {
-	const [alphabetList, ...stateTransitions] = text.trim().split("\n").map(l => l.trim().split("\t"));
+	const [alphabetList, ...stateTransitions] = text.trim().split("\n").map(l => l.trim().split(/\t| {2,}/));
 	let starting: string;
 	const accepting = new Set<string>();
 	const states: Graph = {};
@@ -22,6 +22,9 @@ export function parseTable(text: string): Automata | null {
 			const transition = transitions[i];
 			if (transition.startsWith("{") && transition.endsWith("}")) {
 				states[stateName][alphabetList[i]] = new Set(transition.substring(1, transition.length - 1).split(",").map(s => s.trim()));
+			}
+			else if (transition !== Graph.Empty) {
+				states[stateName][alphabetList[i]] = new Set([ transition ]);
 			}
 		}
 	}
