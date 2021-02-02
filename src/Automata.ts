@@ -3,7 +3,7 @@ import { automataRun } from "./runner";
 import { automataValidate } from "./validate";
 import { test } from "./test";
 import { parseTable } from "./parser";
-import { formatTable } from "./formatter";
+import { formatTable, formatLaTeX } from "./formatter";
 import { constructSubset } from "./construction";
 import { fromRegularExpression } from "./from";
 import { isEmpty } from "./emptiness";
@@ -36,6 +36,7 @@ export const Automata = {
 	test,
 	parseTable,
 	formatTable,
+	formatLaTeX,
 	constructSubset,
 	fromRegularExpression,
 	isEmpty,
