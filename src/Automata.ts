@@ -4,7 +4,7 @@ import { automataValidate } from "./validate";
 import { test } from "./test";
 import { parseTable } from "./parser";
 import { formatTable, formatLaTeX } from "./formatter";
-import { constructSubset } from "./construction";
+import { constructSubset, constructProduct } from "./construction";
 import { fromRegularExpression } from "./from";
 import { isEmpty } from "./emptiness";
 
@@ -38,6 +38,7 @@ export const Automata = {
 	formatTable,
 	formatLaTeX,
 	constructSubset,
+	constructProduct,
 	fromRegularExpression,
 	isEmpty,
 };
