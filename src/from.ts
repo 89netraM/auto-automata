@@ -23,7 +23,9 @@ class StateNameGenerator {
 	}
 }
 
-export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>): Automata {
+export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>): Automata;
+export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>, step: (a: Automata) => void): Automata;
+export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>, step?: (a: Automata) => void): Automata {
 	const stateMap = new Array<[StateNameGenerator, { [pathName: string]: Set<StateNameGenerator> }]>();
 
 	const stateNames = new Array<StateNameGenerator>();
@@ -37,6 +39,9 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 		stateNames.push(next);
 		return next;
 	};
+
+	const starting = new StateNameGenerator(0);
+	const accepting = getStateAfter(starting);
 
 	const generateStates = (): Graph => {
 		const states: Graph = {};
@@ -60,14 +65,41 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 		}
 	};
 
+	const callStep = () => {
+		if (step != null) {
+			const states = generateStates();
+			const alphabet = new Set<string>();
+			for (const state of Object.values(states)) {
+				for (const transitionName in state) {
+					if (transitionName !== Graph.Epsilon) {
+						alphabet.add(transitionName);
+					}
+				}
+			}
+			step({
+				alphabet,
+				accepting: new Set<string>([ accepting.toString() ]),
+				starting: starting.toString(),
+				states: {
+					[accepting.toString()]: { },
+					...states
+				},
+			});
+		}
+	};
+
 	const addToStates = (start: StateNameGenerator, exp: RegularExpression, end: StateNameGenerator): void => {
 		if (exp instanceof Alternative) {
 			const aStart = getStateAfter(start);
 			const aEnd = getStateAfter(aStart);
 			const bStart = getStateAfter(aEnd);
 			const bEnd = getStateAfter(bStart);
-			addToStates(aStart, exp.left, aEnd);
-			addToStates(bStart, exp.right, bEnd);
+			setState(aStart, {
+				[exp.left.format()]: new Set([aEnd]),
+			});
+			setState(bStart, {
+				[exp.right.format()]: new Set([bEnd]),
+			});
 			setState(start, {
 				[Graph.Epsilon]: new Set([aStart, bStart]),
 			});
@@ -77,26 +109,40 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 			setState(bEnd, {
 				[Graph.Epsilon]: new Set([end]),
 			});
+			callStep();
+			addToStates(aStart, exp.left, aEnd);
+			addToStates(bStart, exp.right, bEnd);
 		}
 		else if (exp instanceof Sequence) {
 			const aEnd = getStateAfter(start);
 			const bStart = getStateAfter(aEnd);
-			addToStates(start, exp.left, aEnd);
+			setState(start, {
+				[exp.left.format()]: new Set([aEnd]),
+			});
 			setState(aEnd, {
 				[Graph.Epsilon]: new Set([bStart]),
 			});
+			setState(bStart, {
+				[exp.right.format()]: new Set([end]),
+			});
+			callStep();
+			addToStates(start, exp.left, aEnd);
 			addToStates(bStart, exp.right, end);
 		}
 		else if (exp instanceof Star) {
 			const innerStart = getStateAfter(start);
 			const innerEnd = getStateAfter(innerStart);
-			addToStates(innerStart, exp.exp, innerEnd);
 			setState(start, {
 				[Graph.Epsilon]: new Set([innerStart, end]),
+			});
+			setState(innerStart, {
+				[exp.exp.format()]: new Set([innerEnd]),
 			});
 			setState(innerEnd, {
 				[Graph.Epsilon]: new Set([innerStart, end]),
 			});
+			callStep();
+			addToStates(innerStart, exp.exp, innerEnd);
 		}
 		else if (exp instanceof Empty) {
 			setState(start, {});
@@ -118,8 +164,10 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 		}
 	};
 
-	const starting = new StateNameGenerator(0);
-	const accepting = getStateAfter(starting);
+	setState(starting, {
+		[regularExpression.format()]: new Set([accepting]),
+	});
+	callStep();
 	addToStates(starting, regularExpression, accepting);
 	stateMap.push([accepting, {}]);
 
