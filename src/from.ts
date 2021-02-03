@@ -60,74 +60,67 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 		}
 	};
 
-	const addToStates = (start: StateNameGenerator, exp: RegularExpression): StateNameGenerator => {
+	const addToStates = (start: StateNameGenerator, exp: RegularExpression, end: StateNameGenerator): void => {
 		if (exp instanceof Alternative) {
 			const aStart = getStateAfter(start);
-			const bStart = getStateAfter(aStart);
-			const aEnd = addToStates(aStart, exp.left);
-			const bEnd = addToStates(bStart, exp.right);
+			const aEnd = getStateAfter(aStart);
+			const bStart = getStateAfter(aEnd);
+			const bEnd = getStateAfter(bStart);
+			addToStates(aStart, exp.left, aEnd);
+			addToStates(bStart, exp.right, bEnd);
 			setState(start, {
 				[Graph.Epsilon]: new Set([aStart, bStart]),
 			});
-			const end = getStateAfter(bEnd);
 			setState(aEnd, {
 				[Graph.Epsilon]: new Set([end]),
 			});
 			setState(bEnd, {
 				[Graph.Epsilon]: new Set([end]),
 			});
-			return end;
 		}
 		else if (exp instanceof Sequence) {
-			const aEnd = addToStates(start, exp.left);
+			const aEnd = getStateAfter(start);
 			const bStart = getStateAfter(aEnd);
+			addToStates(start, exp.left, aEnd);
 			setState(aEnd, {
 				[Graph.Epsilon]: new Set([bStart]),
 			});
-			return addToStates(bStart, exp.right);
+			addToStates(bStart, exp.right, end);
 		}
 		else if (exp instanceof Star) {
 			const innerStart = getStateAfter(start);
-			const end = getStateAfter(innerStart);
-			const innerEnd = addToStates(innerStart, exp.exp);
+			const innerEnd = getStateAfter(innerStart);
+			addToStates(innerStart, exp.exp, innerEnd);
 			setState(start, {
 				[Graph.Epsilon]: new Set([innerStart, end]),
 			});
 			setState(innerEnd, {
 				[Graph.Epsilon]: new Set([innerStart, end]),
 			});
-			return end;
 		}
 		else if (exp instanceof Empty) {
-			const end = getStateAfter(start);
 			setState(start, {});
-			return end;
 		}
 		else if (exp instanceof Nil) {
-			const end = getStateAfter(start);
 			setState(start, {
 				[Graph.Epsilon]: new Set([end]),
 			});
-			return end;
 		}
 		else if (exp instanceof Symbol) {
-			const end = getStateAfter(start);
 			setState(start, {
 				[exp.symbol]: new Set([end]),
 			});
-			return end;
 		}
 		else if (exp instanceof Reference) {
-			const end = getStateAfter(start);
 			setState(start, {
 				[exp.name]: new Set([end]),
 			});
-			return end;
 		}
 	};
 
 	const starting = new StateNameGenerator(0);
-	const accepting = addToStates(starting, regularExpression);
+	const accepting = getStateAfter(starting);
+	addToStates(starting, regularExpression, accepting);
 	stateMap.push([accepting, {}]);
 
 	return {
