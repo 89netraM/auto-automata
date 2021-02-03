@@ -1,5 +1,6 @@
 import { graphValidate } from "./validate";
 import { step, graphRun, epsilonClosure } from "./runner";
+import { isDFA, isNFA, isεNFA } from "./type";
 
 const Epsilon = "ε";
 const Empty = "∅";
@@ -29,7 +30,13 @@ export const Graph = {
 	step: step,
 	run: graphRun,
 	epsilonClosure: epsilonClosure,
+	isDFA: isDFA,
+	isNFA: isNFA,
+	isεNFA: isεNFA,
 };
 Object.defineProperty(Graph, "step", { enumerable: true, get: () => step });
 Object.defineProperty(Graph, "run", { enumerable: true, get: () => graphRun });
 Object.defineProperty(Graph, "epsilonClosure", { enumerable: true, get: () => epsilonClosure });
+Object.defineProperty(Graph, "isDFA", { enumerable: true, get: () => isDFA });
+Object.defineProperty(Graph, "isNFA", { enumerable: true, get: () => isNFA });
+Object.defineProperty(Graph, "isεNFA", { enumerable: true, get: () => isεNFA });
