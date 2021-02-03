@@ -106,3 +106,37 @@ export function constructProduct(a: Automata, b: Automata): Automata | null {
 		return null;
 	}
 }
+
+export function constructSum(a: Automata, b: Automata): Automata | null {
+	if (Graph.isDFA(a.states) && Graph.isDFA(b.states) &&
+		[...a.alphabet].every(l => b.alphabet.has(l)) &&
+		[...b.alphabet].every(l => a.alphabet.has(l))) {
+		const starting = SubState.name([a.starting, b.starting]);
+		const accepting = new Set<string>();
+
+		const states: Graph = {};
+		for (const aState in a.states) {
+			for (const bState in b.states) {
+				const transitions = {};
+				for (const l of a.alphabet) {
+					transitions[l] = cartesianProduct(a.states[aState][l], b.states[bState][l]);
+				}
+				states[SubState.name([aState, bState])] = transitions;
+
+				if (a.accepting.has(aState) || b.accepting.has(bState)) {
+					accepting.add(SubState.name([aState, bState]));
+				}
+			}
+		}
+
+		return {
+			starting,
+			accepting,
+			states,
+			alphabet: a.alphabet,
+		}
+	}
+	else {
+		return null;
+	}
+}
