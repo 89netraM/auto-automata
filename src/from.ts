@@ -14,9 +14,18 @@ class StateNameGenerator {
 		return nameString;
 	}
 
+	private static idRecord: number = 0;
+	private static generateId(): number {
+		return StateNameGenerator.idRecord++;
+	}
+
+	public readonly id: number;
+
 	public constructor(
 		public number: number,
-	) { }
+	) {
+		this.id = StateNameGenerator.generateId();
+	}
 
 	public toString(): string {
 		return StateNameGenerator.generateName(this.number);
@@ -26,7 +35,7 @@ class StateNameGenerator {
 export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>): Automata;
 export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>, step: (a: Automata) => void): Automata;
 export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>, step?: (a: Automata) => void): Automata {
-	const stateMap = new Array<[StateNameGenerator, { [pathName: string]: Set<StateNameGenerator> }]>();
+	const stateMap = new Array<[StateNameGenerator, { [pathName: string]: Map<number, StateNameGenerator> }]>();
 
 	const stateNames = new Array<StateNameGenerator>();
 	const getStateAfter = (previous: StateNameGenerator): StateNameGenerator => {
@@ -41,27 +50,81 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 	};
 
 	const starting = new StateNameGenerator(0);
-	const accepting = getStateAfter(starting);
+	const ending = getStateAfter(starting);
+	const accepting = new Map<number, StateNameGenerator>([[ending.id, ending]]);
 
 	const generateStates = (): Graph => {
 		const states: Graph = {};
-		for (const [name, transitionMap] of stateMap) {
-			const transitions = {};
-			for (const path in transitionMap) {
-				transitions[path] = new Set<string>([...transitionMap[path]].map(g => g.toString()));
+		for (const [nameGen, transitionMap] of stateMap) {
+			const name = nameGen.toString();
+			if (name in states) {
+				for (const path in transitionMap) {
+					const set = path in states[name] ? states[name][path] : new Set<string>();
+					for (const [, targetGen] of transitionMap[path]) {
+						set.add(targetGen.toString());
+					}
+					states[name][path] = set;
+				}
 			}
-			states[name.toString()] = transitions;
+			else {
+				const transitions = {};
+				for (const path in transitionMap) {
+					transitions[path] = new Set<string>([...transitionMap[path]].map(([_, g]) => g.toString()));
+				}
+				states[name.toString()] = transitions;
+			}
 		}
 		return states;
 	};
 
-	const setState = (name: StateNameGenerator, value: typeof stateMap[number][1]): void => {
+	const addToState = (name: StateNameGenerator, value: { [path: string]: Array<StateNameGenerator> }): void => {
 		const entry = stateMap.find(([n, _]) => n.number === name.number);
 		if (entry == null) {
-			stateMap.push([name, value]);
+			const transitions = {};
+			for (const path in value) {
+				const map = new Map<number, StateNameGenerator>();
+				for (const targetState of value[path]) {
+					map.set(targetState.id, targetState);
+				}
+				transitions[path] = map;
+			}
+			stateMap.push([name, transitions]);
 		}
 		else {
-			entry[1] = value;
+			for (const path in value) {
+				if (path in entry[1]) {
+					for (const targetState of value[path]) {
+						entry[1][path].set(targetState.id, targetState);
+					}
+				}
+				else {
+					const map = new Map<number, StateNameGenerator>();
+					for (const targetState of value[path]) {
+						map.set(targetState.id, targetState);
+					}
+					entry[1][path] = map;
+				}
+			}
+		}
+	};
+	const removeFromState = (name: StateNameGenerator, value: { [path: string]: Array<StateNameGenerator> }): void => {
+		const entry = stateMap.find(([n, _]) => n.number === name.number);
+		if (entry != null) {
+			for (const path in value) {
+				if (path in entry[1]) {
+					if (value[path] == null) {
+						delete entry[1][path];
+					}
+					else {
+						for (const targetState of value[path]) {
+							entry[1][path].delete(targetState.id);
+						}
+						if (entry[1][path].size === 0) {
+							delete entry[1][path];
+						}
+					}
+				}
+			}
 		}
 	};
 
@@ -76,104 +139,150 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 					}
 				}
 			}
+			if (!(ending.toString() in states)) {
+				states[ending.toString()] = {};
+			}
 			step({
 				alphabet,
-				accepting: new Set<string>([ accepting.toString() ]),
+				accepting: new Set<string>([...accepting].map(([_, v]) => v.toString())),
 				starting: starting.toString(),
-				states: {
-					[accepting.toString()]: { },
-					...states
-				},
+				states,
 			});
 		}
 	};
 
-	const addToStates = (start: StateNameGenerator, exp: RegularExpression, end: StateNameGenerator): void => {
+	const extendState = (from: StateNameGenerator, to: StateNameGenerator): void => {
+		if (to != null) {
+			const transitionsMap = stateMap.find(([k, _]) => k.id === from.id)[1];
+			const transitions = {};
+			for (const path in transitionsMap) {
+				transitions[path] = [...transitionsMap[path].values()];
+			}
+			addToState(to, transitions);
+		}
+	};
+
+	const addToStates = (start: StateNameGenerator, exp: RegularExpression, end: StateNameGenerator): Array<StateNameGenerator> => {
 		if (exp instanceof Alternative) {
-			const aStart = getStateAfter(start);
-			const aEnd = getStateAfter(aStart);
-			const bStart = getStateAfter(aEnd);
-			const bEnd = getStateAfter(bStart);
-			setState(aStart, {
-				[exp.left.format()]: new Set([aEnd]),
-			});
-			setState(bStart, {
-				[exp.right.format()]: new Set([bEnd]),
-			});
-			setState(start, {
-				[Graph.Epsilon]: new Set([aStart, bStart]),
-			});
-			setState(aEnd, {
-				[Graph.Epsilon]: new Set([end]),
-			});
-			setState(bEnd, {
-				[Graph.Epsilon]: new Set([end]),
-			});
+			const exps = exp.flat();
+			for (const e of exps) {
+				addToState(start, {
+					[e.format()]: [end],
+				});
+			}
 			callStep();
-			addToStates(aStart, exp.left, aEnd);
-			addToStates(bStart, exp.right, bEnd);
+			const toExtend = new Array<StateNameGenerator>();
+			for (const e of exps) {
+				removeFromState(start, {
+					[e.format()]: [end],
+				});
+				toExtend.push(
+					...addToStates(start, e, end)
+				);
+			}
+			return toExtend;
 		}
 		else if (exp instanceof Sequence) {
-			const aEnd = getStateAfter(start);
-			const bStart = getStateAfter(aEnd);
-			setState(start, {
-				[exp.left.format()]: new Set([aEnd]),
-			});
-			setState(aEnd, {
-				[Graph.Epsilon]: new Set([bStart]),
-			});
-			setState(bStart, {
-				[exp.right.format()]: new Set([end]),
-			});
-			callStep();
-			addToStates(start, exp.left, aEnd);
-			addToStates(bStart, exp.right, end);
+			const exps = exp.flat().filter(e => !e.equals(Nil.Instance));
+			if (exps.length === 0) {
+				end.number = start.number;
+				callStep();
+			}
+			else if (exps.length === 1) {
+				const [a] = exps;
+				addToState(start, {
+					[a.format()]: [end],
+				});
+				callStep();
+				removeFromState(start, {
+					[a.format()]: [end],
+				});
+				return addToStates(start, a, end);
+			}
+			else {
+				const transitions = new Array<StateNameGenerator>(start);
+				for (let i = 0; i < exps.length - 1; i++) {
+					transitions.push(getStateAfter(transitions[i]));
+				}
+				transitions.push(end);
+
+				for (let i = 0; i < exps.length; i++) {
+					addToState(transitions[i], {
+						[exps[i].format()]: [transitions[i + 1]],
+					});
+				}
+				callStep();
+				const toExtend = new Array<StateNameGenerator>();
+				let lastExtend = new Array<StateNameGenerator>();
+				for (let i = 0; i < exps.length; i++) {
+					removeFromState(transitions[i], {
+						[exps[i].format()]: [transitions[i + 1]],
+					});
+					const newExtend = addToStates(transitions[i], exps[i], transitions[i + 1]);
+					for (const te of toExtend) {
+						extendState(transitions[i], te);
+					}
+					lastExtend = newExtend;
+					toExtend.push(...newExtend);
+				}
+				callStep();
+				return lastExtend;
+			}
 		}
 		else if (exp instanceof Star) {
-			const innerStart = getStateAfter(start);
-			const innerEnd = getStateAfter(innerStart);
-			setState(start, {
-				[Graph.Epsilon]: new Set([innerStart, end]),
+			addToState(start, {
+				[exp.exp.format()]: [end],
 			});
-			setState(innerStart, {
-				[exp.exp.format()]: new Set([innerEnd]),
-			});
-			setState(innerEnd, {
-				[Graph.Epsilon]: new Set([innerStart, end]),
+			addToState(end, {
+				[exp.exp.format()]: [end],
 			});
 			callStep();
-			addToStates(innerStart, exp.exp, innerEnd);
+			removeFromState(start, {
+				[exp.exp.format()]: [end],
+			});
+			addToStates(start, exp.exp, end);
+			removeFromState(end, {
+				[exp.exp.format()]: [end],
+			});
+			addToStates(end, exp.exp, end);
+			return new Array<StateNameGenerator>(start);
 		}
 		else if (exp instanceof Empty) {
-			setState(start, {});
+			addToState(start, {});
 		}
 		else if (exp instanceof Nil) {
-			setState(start, {
-				[Graph.Epsilon]: new Set([end]),
-			});
+			callStep();
+			return new Array<StateNameGenerator>(start);
 		}
 		else if (exp instanceof Symbol) {
-			setState(start, {
-				[exp.symbol]: new Set([end]),
+			addToState(start, {
+				[exp.symbol]: [end],
 			});
 		}
 		else if (exp instanceof Reference) {
-			setState(start, {
-				[exp.name]: new Set([end]),
+			addToState(start, {
+				[exp.name]: [end],
 			});
 		}
+		return new Array<StateNameGenerator>();
 	};
 
-	setState(starting, {
-		[regularExpression.format()]: new Set([accepting]),
+	addToState(starting, {
+		[regularExpression.format()]: [ending],
 	});
 	callStep();
-	addToStates(starting, regularExpression, accepting);
-	stateMap.push([accepting, {}]);
+	removeFromState(starting, {
+		[regularExpression.format()]: null,
+	});
+	const additionalAcceptable = addToStates(starting, regularExpression, ending);
+	for (const aa of additionalAcceptable) {
+		accepting.set(aa.id, aa);
+	}
+	addToState(ending, {});
 
 	return {
 		alphabet,
-		accepting: new Set<string>([accepting.toString()]),
+		accepting: new Set<string>([...accepting].map(([_, v]) => v.toString())),
 		starting: starting.toString(),
 		states: generateStates(),
 	};
