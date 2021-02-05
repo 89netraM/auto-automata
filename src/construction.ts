@@ -152,25 +152,52 @@ export function constructProduct(a: Automata, b: Automata, step?: (a: Automata) 
 	}
 }
 
-export function constructSum(a: Automata, b: Automata): Automata | null {
+export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>): Automata | null;
+export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>, step: (a: Automata) => void): Automata | null;
+export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>, step?: (a: Automata) => void): Automata | null {
 	if (Graph.isDFA(a.states) && Graph.isDFA(b.states) &&
 		[...a.alphabet].every(l => b.alphabet.has(l)) &&
 		[...b.alphabet].every(l => a.alphabet.has(l))) {
 		const starting = SubState.name([a.starting, b.starting]);
-		const accepting = new Set<string>();
+		const accepting = cartesianProduct(a.accepting, b.accepting);
 
 		const states: Graph = {};
-		for (const aState in a.states) {
-			for (const bState in b.states) {
-				const transitions = {};
-				for (const l of a.alphabet) {
-					transitions[l] = cartesianProduct(a.states[aState][l], b.states[bState][l]);
-				}
-				states[SubState.name([aState, bState])] = transitions;
 
-				if (a.accepting.has(aState) || b.accepting.has(bState)) {
-					accepting.add(SubState.name([aState, bState]));
-				}
+		const makeAutomata = (): Automata => {
+			return {
+				starting,
+				accepting,
+				states,
+				alphabet: new Set(a.alphabet),
+			};
+		};
+
+		const queue = new Array<[string, string]>();
+		const enqueue = (name: string, a: string, b: string): void => {
+			if (!(name in states)) {
+				queue.push([a, b]);
+				states[name] = {};
+			}
+		};
+		enqueue(starting, a.starting, b.starting);
+		while (queue.length > 0) {
+			const [aState, bState] = queue.shift();
+			const transitions = {};
+			for (const l of a.alphabet) {
+				const aTarget = [...a.states[aState][l]][0];
+				const bTarget = [...b.states[bState][l]][0];
+				const targetName = SubState.name([aTarget, bTarget]);
+				transitions[l] = new Set<string>([targetName]);
+				enqueue(targetName, aTarget, bTarget);
+			}
+			states[SubState.name([aState, bState])] = transitions;
+
+			// if (a.accepting.has(aState) || b.accepting.has(bState)) {
+			// 	accepting.add(SubState.name([aState, bState]));
+			// }
+
+			if (step != null) {
+				step(makeAutomata());
 			}
 		}
 
