@@ -25,46 +25,69 @@ const SubState = {
  * Takes an automata *N* and constructs a DFA *D* such that *L(N) = L(D)*.
  * @param a The input automata, either a NFA or a ε-NFA.
  */
-export function constructSubset(a: Readonly<Automata>): Automata {
-	const states = { };
+export function constructSubset(a: Readonly<Automata>): Automata;
+/**
+ * Takes an automata *N* and constructs a DFA *D* such that *L(N) = L(D)*.
+ * @param a    The input automata, either a NFA or a ε-NFA.
+ * @param step Called once for each step with the thus far constructed automata.
+ */
+export function constructSubset(a: Readonly<Automata>, step: (a: Automata) => void): Automata;
+export function constructSubset(a: Readonly<Automata>, step?: (a: Automata) => void): Automata {
+	const states: Graph = { };
 	const accepting = new Set<string>();
 
 	const startingState = SubState.construct(a.starting, a);
+
+	const makeAutomata = (): Automata => {
+		return {
+			starting: startingState.name,
+			accepting,
+			states,
+			alphabet: new Set(a.alphabet),
+		};
+	};
+
 	const queue = new Array<SubState>(startingState);
+	states[startingState.name] = {};
 	while (queue.length > 0) {
 		const state = queue.shift();
-		states[state.name] = {};
+		if (state.accepting) {
+			accepting.add(state.name);
+		}
 		for (const symbol of a.alphabet) {
 			const reachableStates = new Set<string>();
 			for (const current of state.states) {
 				Graph.step(a.states, current, symbol).forEach(s => reachableStates.add(s));
 			}
-			states[state.name][symbol] = new Set([reachableStates.size > 0 ? SubState.name(reachableStates) : Graph.Empty]);
-
-			if (state.accepting) {
-				accepting.add(state.name);
-			}
-
 			if (reachableStates.size > 0) {
 				const nextState = SubState.construct(reachableStates, a);
+				states[state.name][symbol] = new Set([nextState.name]);
+
 				if (!(nextState.name in states)) {
+					states[nextState.name] = {};
 					queue.push(nextState);
 				}
 			}
+			else {
+				states[state.name][symbol] = new Set();
+			}
+		}
+		if (step != null) {
+			step(makeAutomata());
 		}
 	}
 
-	states[Graph.Empty] = {};
-	for (const symbol of a.alphabet) {
-		states[Graph.Empty][symbol] = new Set([Graph.Empty]);
+	if (Object.values(states).some(t =>
+			![...a.alphabet].every(l => l in t) ||
+			Object.values(t).some(s => s.size === 0))
+		) {
+		states[Graph.Empty] = {};
+		for (const symbol of a.alphabet) {
+			states[Graph.Empty][symbol] = new Set([Graph.Empty]);
+		}
 	}
 
-	return {
-		starting: startingState.name,
-		accepting,
-		states,
-		alphabet: new Set(a.alphabet),
-	};
+	return makeAutomata();
 }
 
 function cartesianProduct(a: ReadonlySet<string>, b: ReadonlySet<string>): Set<string> {
