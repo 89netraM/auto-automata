@@ -1,6 +1,6 @@
 import React, { Component, ReactNode, KeyboardEvent } from "react";
 import { Automata, Graph } from "../../../src";
-import { compareAutomatas } from "../utils";
+import { compareAutomatas, uuid } from "../utils";
 
 export interface Properties {
 	automata: Automata;
@@ -125,10 +125,12 @@ export class TableAutomata extends Component<Properties, State> {
 		};
 	}
 
+	private readonly id: string;
 
 	public constructor(props: Properties) {
 		super(props);
 
+		this.id = uuid();
 		this.state = TableAutomata.automataToState(this.props.automata);
 	}
 
@@ -344,7 +346,11 @@ export class TableAutomata extends Component<Properties, State> {
 											onChange={e => this.updateNewSymbol(e.target.value)}
 											onKeyPress={e => this.activateAdd(e, this.addNewSymbol.bind(this))}
 											onBlur={this.addNewSymbol.bind(this)}
+											list={`${this.id}-state-name-list`}
 										/>
+										<datalist id={`${this.id}-state-name-list`}>
+											<option value={Graph.Epsilon}/>
+										</datalist>
 									</label>
 								</th>
 						}

@@ -40,6 +40,10 @@ table.automata {
 
 	input[type="text"] {
 		width: calc(5ch + #{$distance});
+
+		&::-webkit-calendar-picker-indicator {
+			display: none;
+		}
 	}
 	td, th {
 		&.error {
