@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"esModuleInterop": true,
+		"jsx": "react",
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"outDir": "dist",
+		"target": "ES2017",
+	}
+}

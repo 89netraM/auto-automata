@@ -1,0 +1,1 @@
+export { compareAutomatas } from "./compareAutomatas";

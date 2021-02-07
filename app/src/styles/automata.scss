@@ -1,0 +1,59 @@
+@import "@89netram/snygg/src/vars";
+
+svg {
+	width: 100%;
+
+	text {
+		fill: var(--color);
+	}
+
+	.node {
+		circle {
+			stroke: var(--color);
+			fill: none;
+			stroke-width: 1px;
+		}
+		&.origin circle {
+			stroke: none;
+			fill: none;
+		}
+		&.accepting circle {
+			stroke-width: 3px;
+		}
+	}
+
+	.edgePath {
+		font-family: monospace;
+
+		path {
+			stroke: var(--color);
+			fill: var(--color);
+			stroke-width: 1.5px;
+		}
+	}
+}
+
+table.automata {
+	input[type="radio"] + .radio {
+		margin-top: 0px;
+	}
+
+	input[type="text"] {
+		width: calc(5ch + #{$distance});
+	}
+	td, th {
+		&.error {
+			color: var(--error);
+		}
+
+		&:nth-child(n + 3) {
+			&, & input {
+				text-align: center;
+			}
+		}
+
+		&.delete {
+			cursor: pointer;
+		}
+	}
+}
