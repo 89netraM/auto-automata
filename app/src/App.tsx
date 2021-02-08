@@ -1,8 +1,9 @@
 import React, { Component, ReactNode, MouseEvent } from "react";
-import { Home } from "./pages/Home";
+import { Home, SubsetConstruction } from "./pages";
 
 const pages = {
 	"Home": <Home />,
+	"Subset Construction": <SubsetConstruction />,
 } as const;
 
 interface State {
