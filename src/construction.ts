@@ -39,21 +39,28 @@ export function constructSubset(a: Readonly<Automata>, step?: (a: Automata) => v
 	const startingState = SubState.construct(a.starting, a);
 
 	const makeAutomata = (): Automata => {
+		const statesClone: Graph = {};
+		for (const state in states) {
+			statesClone[state] = {};
+			for (const symbol in states[state]) {
+				statesClone[state][symbol] = new Set<string>(states[state][symbol]);
+			}
+		}
 		return {
 			starting: startingState.name,
-			accepting,
-			states,
+			accepting: new Set<string>(accepting),
+			states: statesClone,
 			alphabet: new Set(a.alphabet),
 		};
 	};
 
 	const queue = new Array<SubState>(startingState);
 	states[startingState.name] = {};
+	if (startingState.accepting) {
+		accepting.add(startingState.name);
+	}
 	while (queue.length > 0) {
 		const state = queue.shift();
-		if (state.accepting) {
-			accepting.add(state.name);
-		}
 		for (const symbol of a.alphabet) {
 			const reachableStates = new Set<string>();
 			for (const current of state.states) {
@@ -65,6 +72,9 @@ export function constructSubset(a: Readonly<Automata>, step?: (a: Automata) => v
 
 				if (!(nextState.name in states)) {
 					states[nextState.name] = {};
+					if (nextState.accepting) {
+						accepting.add(nextState.name);
+					}
 					queue.push(nextState);
 				}
 			}
