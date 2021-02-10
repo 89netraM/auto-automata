@@ -22,6 +22,9 @@ interface State {
 export class TableAutomata extends Component<Properties, State> {
 	private static automataToState(a: Automata): State {
 		const alphabet = [...a.alphabet].sort();
+		if (Object.values(a.states).some(s => Graph.Epsilon in s)) {
+			alphabet.unshift(Graph.Epsilon);
+		}
 
 		const states = new Array<State["states"][number]>();
 		for (const name in a.states) {
@@ -121,7 +124,7 @@ export class TableAutomata extends Component<Properties, State> {
 			starting,
 			accepting,
 			states,
-			alphabet: new Set<string>(s.alphabet.map(([s, _]) => s)),
+			alphabet: new Set<string>(s.alphabet.map(([s, _]) => s).filter(s => s !== Graph.Epsilon)),
 		};
 	}
 
@@ -302,7 +305,6 @@ export class TableAutomata extends Component<Properties, State> {
 								<label className={!t[1] ? "error" : ""}>
 									<input type="text"
 										readOnly={this.props.readOnly}
-										disabled={this.props.readOnly}
 										value={t[0]}
 										onChange={e => this.updateTransitions(state.name, i, e.target.value)}
 										placeholder={Graph.Empty}
@@ -311,10 +313,13 @@ export class TableAutomata extends Component<Properties, State> {
 							</td>
 						)
 					}
-					<td className="delete"
-						title={`Delete state ${state.name}`}
-						onClick={() => this.deleteState(state.name)}
-					>🗑️</td>
+					{
+						this.props.readOnly ? null :
+							<td className="delete"
+								title={`Delete state ${state.name}`}
+								onClick={() => this.deleteState(state.name)}
+							>🗑️</td>
+					}
 				</tr>
 			);
 		}
@@ -349,7 +354,10 @@ export class TableAutomata extends Component<Properties, State> {
 											list={`${this.id}-state-name-list`}
 										/>
 										<datalist id={`${this.id}-state-name-list`}>
-											<option value={Graph.Epsilon}/>
+											{
+												this.state.alphabet.some(s => s === Graph.Epsilon) ? null :
+													<option value={Graph.Epsilon}/>
+											}
 										</datalist>
 									</label>
 								</th>
