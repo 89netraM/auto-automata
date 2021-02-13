@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from "react";
 import { Automata } from "../../../src";
+import { AutomataSteps } from "../components/AutomataSteps";
 import { TableAutomata } from "../components/TableAutomata";
 import { VisualAutomata } from "../components/VisualAutomata";
 
@@ -46,26 +47,10 @@ export class SubsetConstruction extends Component<{}, State> {
 						>Construct Subset</button>
 					</p>
 				</section>
-
-				{
-					this.state.steps.length === 0 ? null :
-					<>
-						<section>
-							<h2>Steps</h2>
-							<p>The steps for subset construction of the given automata.</p>
-							{
-								this.state.steps.map((a, i) =>
-									<div key={i}>
-										<VisualAutomata automata={a}/>
-										<hr/>
-									</div>
-								)
-							}
-							<TableAutomata automata={this.state.steps[this.state.steps.length - 1]}
-								readOnly={true}/>
-						</section>
-					</>
-				}
+				<AutomataSteps steps={this.state.steps}>
+					<h2>Steps</h2>
+					<p>The steps for subset construction of the given automata.</p>
+				</AutomataSteps>
 			</>
 		);
 	}
