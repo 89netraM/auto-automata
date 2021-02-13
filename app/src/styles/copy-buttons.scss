@@ -18,6 +18,9 @@
 			content: "📄";
 			animation-duration: 3s;
 		}
+		&.save::after {
+			content: "💾";
+		}
 
 		&.success::after {
 			animation-name: success-copy;

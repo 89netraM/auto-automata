@@ -3,6 +3,12 @@
 .visual-automata {
 	overflow-x: auto;
 
+	.copy-buttons {
+		position: sticky;
+		left: 0px;
+		text-align: end;
+	}
+
 	svg {
 		min-width: 100%;
 	
