@@ -19,6 +19,11 @@ interface State {
 	newState: [string, boolean];
 }
 
+enum CopyType {
+	ASCII,
+	LaTeX,
+}
+
 export class TableAutomata extends Component<Properties, State> {
 	private static automataToState(a: Automata): State {
 		const alphabet = [...a.alphabet].sort();
@@ -270,6 +275,34 @@ export class TableAutomata extends Component<Properties, State> {
 		this.callOnChange();
 	}
 
+	private async copyAs(button: HTMLButtonElement, type: CopyType): Promise<void> {
+		button.classList.remove("success", "fail");
+		const a = TableAutomata.stateToAutomata(this.state);
+		if (Automata.validate(a) === true) {
+			try {
+				let text: string;
+				switch (type) {
+					case CopyType.ASCII:
+						text = Automata.formatTable(a);
+						break;
+					case CopyType.LaTeX:
+						text = Automata.formatLaTeX(a);
+						break;
+					default:
+						throw null;
+				}
+				await navigator.clipboard.writeText(text);
+				button.classList.add("success");
+			}
+			catch {
+				setTimeout(() => button.classList.add("fail"));
+			}
+		}
+		else {
+			setTimeout(() => button.classList.add("fail"));
+		}
+	}
+
 	public render(): ReactNode {
 		const tableRows = new Array<JSX.Element>();
 		for (let i = 0; i < this.state.states.length; i++) {
@@ -327,75 +360,87 @@ export class TableAutomata extends Component<Properties, State> {
 		const missingStarting = this.state.states.length > 0 && !this.state.states.some(s => s.starting);
 
 		return (
-			<table className="automata">
-				<thead>
-					<tr>
-						<th className={missingStarting ? "error" : ""}
-							title={missingStarting ? "No starting point selected" : "Starting"}
-						>→</th>
-						<th title="Accepting">*</th>
-						<th>State</th>
-						{
-							this.state.alphabet.map(s =>
-								<th key={s}>{s}</th>
-							)
-						}
+			<div>
+				<table className="automata">
+					<thead>
+						<tr>
+							<th className={missingStarting ? "error" : ""}
+								title={missingStarting ? "No starting point selected" : "Starting"}
+							>→</th>
+							<th title="Accepting">*</th>
+							<th>State</th>
+							{
+								this.state.alphabet.map(s =>
+									<th key={s}>{s}</th>
+								)
+							}
+							{
+								this.props.readOnly ? null :
+									<th>
+										<label className={!this.state.newSymbol[1] ? "error" : ""}>
+											<input
+												type="text"
+												placeholder="Add"
+												value={this.state.newSymbol[0]}
+												onChange={e => this.updateNewSymbol(e.target.value)}
+												onKeyPress={e => this.activateAdd(e, this.addNewSymbol.bind(this))}
+												onBlur={this.addNewSymbol.bind(this)}
+												list={`${this.id}-state-name-list`}
+											/>
+											<datalist id={`${this.id}-state-name-list`}>
+												{
+													this.state.alphabet.some(s => s === Graph.Epsilon) ? null :
+														<option value={Graph.Epsilon}/>
+												}
+											</datalist>
+										</label>
+									</th>
+							}
+						</tr>
+					</thead>
+					<tbody>
+						{tableRows}
 						{
 							this.props.readOnly ? null :
-								<th>
-									<label className={!this.state.newSymbol[1] ? "error" : ""}>
-										<input
-											type="text"
-											placeholder="Add"
-											value={this.state.newSymbol[0]}
-											onChange={e => this.updateNewSymbol(e.target.value)}
-											onKeyPress={e => this.activateAdd(e, this.addNewSymbol.bind(this))}
-											onBlur={this.addNewSymbol.bind(this)}
-											list={`${this.id}-state-name-list`}
-										/>
-										<datalist id={`${this.id}-state-name-list`}>
-											{
-												this.state.alphabet.some(s => s === Graph.Epsilon) ? null :
-													<option value={Graph.Epsilon}/>
-											}
-										</datalist>
-									</label>
-								</th>
+								<tr>
+									<td></td>
+									<td></td>
+									<td>
+										<label className={!this.state.newState[1] ? "error" : ""}>
+											<input
+												type="text"
+												placeholder="Add"
+												value={this.state.newState[0]}
+												onChange={e => this.updateNewState(e.target.value)}
+												onKeyPress={e => this.activateAdd(e, this.addNewState.bind(this))}
+												onBlur={this.addNewState.bind(this)}
+											/>
+										</label>
+									</td>
+									{
+										this.state.alphabet.map((s, i) =>
+											<td key={s}
+												className="delete"
+												title={`Delete symbol ${s}`}
+												onClick={() => this.deleteSymbol(i)}
+											>🗑️</td>
+										)
+									}
+								</tr>
 						}
-					</tr>
-				</thead>
-				<tbody>
-					{tableRows}
-					{
-						this.props.readOnly ? null :
-							<tr>
-								<td></td>
-								<td></td>
-								<td>
-									<label className={!this.state.newState[1] ? "error" : ""}>
-										<input
-											type="text"
-											placeholder="Add"
-											value={this.state.newState[0]}
-											onChange={e => this.updateNewState(e.target.value)}
-											onKeyPress={e => this.activateAdd(e, this.addNewState.bind(this))}
-											onBlur={this.addNewState.bind(this)}
-										/>
-									</label>
-								</td>
-								{
-									this.state.alphabet.map((s, i) =>
-										<td key={s}
-											className="delete"
-											title={`Delete symbol ${s}`}
-											onClick={() => this.deleteSymbol(i)}
-										>🗑️</td>
-									)
-								}
-							</tr>
-					}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+				<div className="copy-buttons">
+					<button
+						onClick={e => this.copyAs(e.currentTarget, CopyType.ASCII)}
+						title="Copy this automata as an ASCII table"
+					>ASCII table</button>
+					<button
+						onClick={e => this.copyAs(e.currentTarget, CopyType.LaTeX)}
+						title="Copy this automata as LaTeX"
+					>LaTeX</button>
+				</div>
+			</div>
 		);
 	}
 }

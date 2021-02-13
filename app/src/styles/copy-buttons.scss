@@ -1,0 +1,40 @@
+@import "@89netram/snygg/src/vars";
+
+.copy-buttons {
+	margin-block-start: $distance / 2;
+
+	button {
+		font-size: 0.75em;
+		padding: $distance * 0.4 $distance * 0.8;
+
+		&:not(:first-child) {
+			margin-inline-start: 1ch;
+		}
+
+		&::after {
+			width: 3ch;
+			display: inline-block;
+			text-align: end;
+			content: "📄";
+			animation-duration: 3s;
+		}
+
+		&.success::after {
+			animation-name: success-copy;
+		}
+		@keyframes success-copy {
+			0% { content: "✔️"; }
+			99% { content: "✔️"; }
+			100% { content: inherit; }
+		}
+
+		&.fail::after {
+			animation-name: fail-copy;
+		}
+		@keyframes fail-copy {
+			0% { content: "❌"; }
+			99% { content: "❌"; }
+			100% { content: inherit; }
+		}
+	}
+}
