@@ -10,6 +10,7 @@ const pages = {
 
 interface State {
 	active: string;
+	navVisible: boolean;
 }
 
 export class App extends Component<{}, State> {
@@ -18,6 +19,7 @@ export class App extends Component<{}, State> {
 
 		this.state = {
 			active: "Home",
+			navVisible: false,
 		};
 	}
 
@@ -25,6 +27,7 @@ export class App extends Component<{}, State> {
 		e.preventDefault();
 		this.setState({
 			active: path,
+			navVisible: false,
 		});
 	}
 
@@ -32,10 +35,13 @@ export class App extends Component<{}, State> {
 		return (
 			<>
 				<header>
-					<button className="expand-nav"></button>
+					<button
+						className="expand-nav"
+						onClick={() => this.setState({ navVisible: !this.state.navVisible })}
+					></button>
 					<h1>Auto Automata</h1>
 				</header>
-				<nav>
+				<nav className={this.state.navVisible ? "visible" : null}>
 					<ul>
 						{Object.keys(pages).map(name =>
 							<li key={name}
