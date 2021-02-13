@@ -23,9 +23,9 @@ class StateNameGenerator {
 	}
 }
 
-export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>): Automata;
-export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>, step: (a: Automata) => void): Automata;
-export function fromRegularExpression(regularExpression: RegularExpression, alphabet: Set<string>, step?: (a: Automata) => void): Automata {
+export function fromRegularExpression(regularExpression: RegularExpression): Automata;
+export function fromRegularExpression(regularExpression: RegularExpression, step: (a: Automata) => void): Automata;
+export function fromRegularExpression(regularExpression: RegularExpression, step?: (a: Automata) => void): Automata {
 	const stateMap = new Array<[StateNameGenerator, { [pathName: string]: Set<StateNameGenerator> }]>();
 
 	const stateNames = new Array<StateNameGenerator>();
@@ -54,6 +54,26 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 		}
 		return states;
 	};
+	const generateAutomata = (): Automata => {
+		const states = generateStates();
+		const alphabet = new Set<string>();
+		for (const state of Object.values(states)) {
+			for (const transitionName in state) {
+				if (transitionName !== Graph.Epsilon) {
+					alphabet.add(transitionName);
+				}
+			}
+		}
+		return {
+			alphabet,
+			accepting: new Set<string>([ accepting.toString() ]),
+			starting: starting.toString(),
+			states: {
+				[accepting.toString()]: { },
+				...states
+			},
+		};
+	};
 
 	const setState = (name: StateNameGenerator, value: typeof stateMap[number][1]): void => {
 		const entry = stateMap.find(([n, _]) => n.number === name.number);
@@ -67,24 +87,7 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 
 	const callStep = () => {
 		if (step != null) {
-			const states = generateStates();
-			const alphabet = new Set<string>();
-			for (const state of Object.values(states)) {
-				for (const transitionName in state) {
-					if (transitionName !== Graph.Epsilon) {
-						alphabet.add(transitionName);
-					}
-				}
-			}
-			step({
-				alphabet,
-				accepting: new Set<string>([ accepting.toString() ]),
-				starting: starting.toString(),
-				states: {
-					[accepting.toString()]: { },
-					...states
-				},
-			});
+			step(generateAutomata());
 		}
 	};
 
@@ -146,6 +149,7 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 		}
 		else if (exp instanceof Empty) {
 			setState(start, {});
+			callStep();
 		}
 		else if (exp instanceof Nil) {
 			setState(start, {
@@ -171,10 +175,5 @@ export function fromRegularExpression(regularExpression: RegularExpression, alph
 	addToStates(starting, regularExpression, accepting);
 	stateMap.push([accepting, {}]);
 
-	return {
-		alphabet,
-		accepting: new Set<string>([accepting.toString()]),
-		starting: starting.toString(),
-		states: generateStates(),
-	};
+	return generateAutomata();
 }
