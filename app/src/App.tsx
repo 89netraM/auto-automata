@@ -1,9 +1,10 @@
 import React, { Component, ReactNode, MouseEvent } from "react";
-import { Home, SubsetConstruction } from "./pages";
+import { Home, RegularExpressionToAutomata, SubsetConstruction } from "./pages";
 
 const pages = {
 	"Home": <Home />,
 	"Subset Construction": <SubsetConstruction />,
+	"RegExp to Automata": <RegularExpressionToAutomata />,
 } as const;
 
 interface State {
