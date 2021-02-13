@@ -2,6 +2,7 @@ import React, { Component, ReactNode } from "react";
 import { Automata, RegularExpressions as RE } from "../../../src";
 import { AutomataSteps } from "../components/AutomataSteps";
 import { RegularExpressionBox } from "../components/RegularExpressionBox";
+import { TableAutomata } from "../components/TableAutomata";
 
 interface State {
 	expression: RE.RegularExpression;
@@ -41,10 +42,19 @@ export class RegularExpressionToAutomata extends Component<{}, State> {
 						>Convert</button>
 					</p>
 				</section>
-				<AutomataSteps steps={this.state.steps}>
-					<h2>Steps</h2>
-					<p>The steps for building an ε-NFA from the given regular expression.</p>
-				</AutomataSteps>
+				{
+					this.state.steps.length === 0 ? null :
+					<section>
+						<h2>Steps</h2>
+						<p>The steps for building an ε-NFA from the given regular expression.</p>
+						<AutomataSteps steps={this.state.steps}/>
+						<h3>Final result</h3>
+						<TableAutomata
+							automata={this.state.steps[this.state.steps.length - 1]}
+							readOnly={true}
+						/>
+					</section>
+				}
 			</>
 		);
 	}

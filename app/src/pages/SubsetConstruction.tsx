@@ -47,10 +47,19 @@ export class SubsetConstruction extends Component<{}, State> {
 						>Construct Subset</button>
 					</p>
 				</section>
-				<AutomataSteps steps={this.state.steps}>
-					<h2>Steps</h2>
-					<p>The steps for subset construction of the given automata.</p>
-				</AutomataSteps>
+				{
+					this.state.steps.length === 0 ? null :
+					<section>
+						<h2>Steps</h2>
+						<p>The steps for subset construction of the given automata.</p>
+						<AutomataSteps steps={this.state.steps}/>
+						<h3>Final result</h3>
+						<TableAutomata
+							automata={this.state.steps[this.state.steps.length - 1]}
+							readOnly={true}
+						/>
+					</section>
+				}
 			</>
 		);
 	}
