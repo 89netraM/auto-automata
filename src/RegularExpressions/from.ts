@@ -130,7 +130,16 @@ export function fromAutomata(a: Automata, step?: (a: Automata) => void): Regular
 
 	// Eliminate states
 	callStep();
-	for (const state in a.states) {
+	const stateConnections: { [key: number]: string } = {};
+	for (const [from, to] of paths) {
+		if (from !== startingStateName) {
+			stateConnections[from] = from in stateConnections ? stateConnections[from] + 1 : 0;
+		}
+		if (to !== acceptingStateName) {
+			stateConnections[to] = to in stateConnections ? stateConnections[to] + 1 : 0;
+		}
+	}
+	for (const state of Object.keys(a.states).sort((a, b) => stateConnections[a] - stateConnections[b])) {
 		const froms: Array<[string, RegularExpression]> = paths
 			.filter(([f, t]) => f !== state && t === state)
 			.map(([f, t]) => [f, expressions.get(makeKey(f, t))]);
