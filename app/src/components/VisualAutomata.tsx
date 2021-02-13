@@ -88,28 +88,31 @@ export class VisualAutomata extends Component<Properties, {}> {
 		const height = Number.isFinite(g.graph().height) ? g.graph().height : 0;
 		const width = Number.isFinite(g.graph().width) ? g.graph().width : 0;
 		this.svg.attr("height", height + 40);
+		this.svg.attr("width", width + 40);
 		const bounds = this.svgRef.current.getBoundingClientRect();
 		this.inner.attr("transform", `translate(${(bounds.width - width) / 2}, ${(bounds.height - height) / 2})`);
 	}
 
 	public render(): ReactNode {
 		return (
-			<svg ref={this.svgRef}>
-				<filter id="dilate-and-xor">
-					<feMorphology
-						in="SourceGraphic"
-						result="dilate-result"
-						operator="dilate"
-						radius="1"
-					/>
-					<feComposite
-						in="SourceGraphic"
-						in2="dilate-result"
-						result="xor-result"
-						operator="xor"
-					/>
-				</filter>
-			</svg>
+			<div className="visual-automata">
+				<svg ref={this.svgRef}>
+					<filter id="dilate-and-xor">
+						<feMorphology
+							in="SourceGraphic"
+							result="dilate-result"
+							operator="dilate"
+							radius="1"
+						/>
+						<feComposite
+							in="SourceGraphic"
+							in2="dilate-result"
+							result="xor-result"
+							operator="xor"
+						/>
+					</filter>
+				</svg>
+			</div>
 		);
 	}
 }

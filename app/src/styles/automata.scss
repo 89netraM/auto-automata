@@ -1,34 +1,38 @@
 @import "@89netram/snygg/src/vars";
 
-svg {
-	width: 100%;
+.visual-automata {
+	overflow-x: auto;
 
-	text {
-		fill: var(--color);
-	}
-
-	.node {
-		circle {
-			stroke: var(--color);
-			fill: none;
-			stroke-width: 1px;
-		}
-		&.origin circle {
-			stroke: none;
-			fill: none;
-		}
-		&.accepting circle {
-			stroke-width: 3px;
-		}
-	}
-
-	.edgePath {
-		font-family: monospace;
-
-		path {
-			stroke: var(--color);
+	svg {
+		min-width: 100%;
+	
+		text {
 			fill: var(--color);
-			stroke-width: 1.5px;
+		}
+	
+		.node {
+			circle {
+				stroke: var(--color);
+				fill: none;
+				stroke-width: 1px;
+			}
+			&.origin circle {
+				stroke: none;
+				fill: none;
+			}
+			&.accepting circle {
+				stroke-width: 3px;
+			}
+		}
+	
+		.edgePath {
+			font-family: monospace;
+	
+			path {
+				stroke: var(--color);
+				fill: var(--color);
+				stroke-width: 1.5px;
+			}
 		}
 	}
 }
