@@ -10,7 +10,9 @@ import { Symbol } from "./Symbol";
 // Steps for the algorithm from http://www.cse.chalmers.se/edu/year/2020/course/TMV028_Automata/lectures/L8.pdf#page=19
 // But this first step is from https://www.geeksforgeeks.org/generating-regular-expression-from-finite-automata/
 
-export function fromAutomata(a: Automata): RegularExpression {
+export function fromAutomata(a: Automata): RegularExpression;
+export function fromAutomata(a: Automata, step: (a: Automata) => void): RegularExpression;
+export function fromAutomata(a: Automata, step?: (a: Automata) => void): RegularExpression {
 	/**
 	 * Map from state names (from-to) to the expressions that describe the
 	 * transition.
@@ -95,7 +97,39 @@ export function fromAutomata(a: Automata): RegularExpression {
 		addPath(stateName, acceptingStateName);
 	}
 
+	/**
+	 * If a `step` function was provided, creates an automata for the
+	 * "current" step and calls `step` with it.
+	 */
+	const callStep = (): void => {
+		if (step != null) {
+			const a: Automata = {
+				starting: startingStateName,
+				accepting: new Set<string>([acceptingStateName]),
+				states: {
+					[acceptingStateName]: {},
+				},
+				alphabet: new Set<string>(),
+			};
+
+			for (const [from, to] of paths) {
+				const exp = expressions.get(makeKey(from, to)).simplify().format();
+				a.alphabet.add(exp);
+
+				if (!(from in a.states)) {
+					a.states[from] = {};
+				}
+				const set = exp in a.states[from] ? a.states[from][exp] : new Set<string>();
+				set.add(to);
+				a.states[from][exp] = set;
+			}
+
+			step(a);
+		}
+	};
+
 	// Eliminate states
+	callStep();
 	for (const state in a.states) {
 		const froms: Array<[string, RegularExpression]> = paths
 			.filter(([f, t]) => f !== state && t === state)
@@ -122,6 +156,7 @@ export function fromAutomata(a: Automata): RegularExpression {
 			}
 		}
 		expressions.delete(selfKey);
+		callStep();
 	}
 
 	const finalKey = makeKey(startingStateName, acceptingStateName);
