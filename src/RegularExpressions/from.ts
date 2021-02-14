@@ -41,7 +41,7 @@ export function fromAutomata(a: Automata, step?: (a: Automata) => void): Regular
 		if (expressions.has(key)) {
 			exp = new Alternative(expressions.get(key), exp);
 		}
-		expressions.set(key, exp);
+		expressions.set(key, exp.simplify());
 		addPath(from, to);
 	};
 
@@ -130,13 +130,13 @@ export function fromAutomata(a: Automata, step?: (a: Automata) => void): Regular
 
 	// Eliminate states
 	callStep();
-	const stateConnections: { [key: number]: string } = {};
+	const stateConnections: { [stateName: string]: number } = {};
 	for (const [from, to] of paths) {
 		if (from !== startingStateName) {
-			stateConnections[from] = from in stateConnections ? stateConnections[from] + 1 : 0;
+			stateConnections[from] = from in stateConnections ? stateConnections[from] + 1 : 1;
 		}
-		if (to !== acceptingStateName) {
-			stateConnections[to] = to in stateConnections ? stateConnections[to] + 1 : 0;
+		if (to !== from && to !== acceptingStateName) {
+			stateConnections[to] = to in stateConnections ? stateConnections[to] + 1 : 1;
 		}
 	}
 	for (const state of Object.keys(a.states).sort((a, b) => stateConnections[a] - stateConnections[b])) {
