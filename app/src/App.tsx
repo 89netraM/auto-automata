@@ -1,5 +1,5 @@
 import React, { Component, ReactNode, MouseEvent } from "react";
-import { AutomataToRegularExpression, Home, RegularExpressionToAutomata, SubsetConstruction, TestAutomata } from "./pages";
+import { AutomataToRegularExpression, Home, RegularExpressionToAutomata, SubsetConstruction, TestAutomata, TestRegularExpression } from "./pages";
 
 const pages = {
 	"Home": <Home />,
@@ -7,6 +7,7 @@ const pages = {
 	"RegExp to Automata": <RegularExpressionToAutomata />,
 	"Automata to RegExp": <AutomataToRegularExpression />,
 	"Test Automata": <TestAutomata />,
+	"Test RegExp": <TestRegularExpression />,
 } as const;
 
 interface State {
