@@ -17,6 +17,18 @@ module.exports = {
 					"css-loader",
 					"sass-loader"
 				]
+			},
+			{
+				test: /\.md$/,
+				use: [
+					{
+						loader: "babel-loader",
+						options: {
+							presets: [ "@babel/preset-react" ]
+						}
+					},
+					"markdown-to-react-loader"
+				]
 			}
 		]
 	},

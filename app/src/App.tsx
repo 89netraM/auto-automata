@@ -1,13 +1,13 @@
 import React, { Component, ReactNode, MouseEvent } from "react";
-import { AutomataToRegularExpression, Home, RegularExpressionToAutomata, SubsetConstruction, TestAutomata, TestRegularExpression } from "./pages";
+import { AutomataToRegularExpression, Readme, RegularExpressionToAutomata, SubsetConstruction, TestAutomata, TestRegularExpression } from "./pages";
 
 const pages = {
-	"Home": <Home />,
-	"Subset Construction": <SubsetConstruction />,
-	"RegExp to Automata": <RegularExpressionToAutomata />,
-	"Automata to RegExp": <AutomataToRegularExpression />,
+	"Readme": <Readme />,
 	"Test Automata": <TestAutomata />,
+	"Subset Construction": <SubsetConstruction />,
+	"Automata to RegExp": <AutomataToRegularExpression />,
 	"Test RegExp": <TestRegularExpression />,
+	"RegExp to Automata": <RegularExpressionToAutomata />,
 } as const;
 
 interface State {
@@ -20,7 +20,7 @@ export class App extends Component<{}, State> {
 		super(props);
 
 		this.state = {
-			active: "Home",
+			active: "Readme",
 			navVisible: false,
 		};
 	}

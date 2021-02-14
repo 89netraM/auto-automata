@@ -2,3 +2,13 @@
 @import "./automata";
 @import "./action-buttons";
 @import "./test";
+@import "./readme";
+
+main a {
+	color: var(--accent);
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
