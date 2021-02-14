@@ -1,0 +1,36 @@
+header {
+	nav {
+		a {
+			&:hover {
+				background: none;
+			}
+	
+			img {
+				max-width: unset;
+				margin-left: 0px;
+				display: none;
+
+				@media (prefers-color-scheme: dark) {
+					&.only-dark {
+						display: inline-block;
+					}
+				}
+				@media (prefers-color-scheme: light) {
+					&.only-light {
+						display: inline-block;
+					}
+				}
+				[data-theme="dark"] {
+					&.only-dark {
+						display: inline-block;
+					}
+				}
+				[data-theme="light"] {
+					&.only-light {
+						display: inline-block;
+					}
+				}
+			}
+		}
+	}
+}

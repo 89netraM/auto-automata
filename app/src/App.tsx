@@ -42,6 +42,15 @@ export class App extends Component<{}, State> {
 						onClick={() => this.setState({ navVisible: !this.state.navVisible })}
 					></button>
 					<h1>Auto Automata</h1>
+					<nav>
+						<a
+							href="https://github.com/89netraM/auto-automata"
+							target="_blank"
+						>
+							<img className="only-dark" src="./static/GitHub_Logo_White.png"/>
+							<img className="only-light" src="./static/GitHub_Logo.png"/>
+						</a>
+					</nav>
 				</header>
 				<nav className={this.state.navVisible ? "visible" : null}>
 					<ul>

@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
 	entry: path.resolve(__dirname, "./src/index.tsx"),
@@ -40,6 +41,11 @@ module.exports = {
 			template: path.resolve(__dirname, "index.html"),
 			title: "Auto Automata",
 			base: "./"
+		}),
+		new CopyPlugin({
+			patterns: [
+				{ from: path.resolve(__dirname, "static"), to: "./static/" }
+			]
 		})
 	],
 	output: {
