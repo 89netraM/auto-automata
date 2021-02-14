@@ -18,7 +18,7 @@ const SubState = {
 			accepting: [...states].some(s => a.accepting.has(s)),
 		}
 	},
-	name: (states: Iterable<string>): string => [...states].sort().join(","),
+	name: (states: Iterable<string>): string => [...states].sort().join(""),
 };
 
 /**
