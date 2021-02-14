@@ -15,7 +15,7 @@ export function parseTable(text: string): Automata | null {
 	const states: Graph = {};
 
 	for (const line of stateTransitions) {
-		const [, arrow, star, stateName, transitions] = line.match(/^(→|->)? ?(\*)? ?(.+?)\s(.*)/);
+		const [, arrow, star, stateName, transitions] = line.match(/^(→|->)?\s?(\*)?\s?(.+?)\s(.*)/);
 
 		if (starting == null && arrow != null) {
 			starting = stateName;
