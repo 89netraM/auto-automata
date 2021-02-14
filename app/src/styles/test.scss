@@ -1,0 +1,13 @@
+.test-string {
+	span {
+		padding-inline-start: 1ch;
+		font-size: 1.1em;
+
+		&.included::before {
+			content: "✔️";
+		}
+		&.excluded::before {
+			content: "❌";
+		}
+	}
+}
