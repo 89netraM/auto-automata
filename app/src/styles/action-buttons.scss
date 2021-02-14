@@ -1,6 +1,6 @@
 @import "@89netram/snygg/src/vars";
 
-.copy-buttons {
+.action-buttons {
 	margin-block-start: $distance / 2;
 
 	button {
@@ -15,11 +15,8 @@
 			width: 3ch;
 			display: inline-block;
 			text-align: end;
-			content: "📄";
+			content: attr(data-icon);
 			animation-duration: 3s;
-		}
-		&.save::after {
-			content: "💾";
 		}
 
 		&.success::after {

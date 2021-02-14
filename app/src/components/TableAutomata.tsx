@@ -303,6 +303,25 @@ export class TableAutomata extends Component<Properties, State> {
 		}
 	}
 
+	private async pasteASCII(button: HTMLButtonElement): Promise<void> {
+		button.classList.remove("success", "fail");
+		try {
+			const text = await navigator.clipboard.readText();
+			const automata = Automata.parseTable(text);
+			if (automata != null && Automata.validate(automata) === true) {
+				await this.setState(TableAutomata.automataToState(automata));
+				this.callOnChange();
+				button.classList.add("success");
+			}
+			else {
+				throw null;
+			}
+		}
+		catch {
+			setTimeout(() => button.classList.add("fail"));
+		}
+	}
+
 	public render(): ReactNode {
 		const tableRows = new Array<JSX.Element>();
 		for (let i = 0; i < this.state.states.length; i++) {
@@ -361,6 +380,15 @@ export class TableAutomata extends Component<Properties, State> {
 
 		return (
 			<div>
+				{
+					this.props.readOnly ? null :
+					<div className="action-buttons">
+						<button
+							data-icon="📋"
+							onClick={e => this.pasteASCII(e.currentTarget)}
+						>Paste from ASCII table</button>
+					</div>
+				}
 				<table className="automata">
 					<thead>
 						<tr>
@@ -430,12 +458,14 @@ export class TableAutomata extends Component<Properties, State> {
 						}
 					</tbody>
 				</table>
-				<div className="copy-buttons">
+				<div className="action-buttons">
 					<button
+						data-icon="📄"
 						onClick={e => this.copyAs(e.currentTarget, CopyType.ASCII)}
 						title="Copy this automata as an ASCII table"
 					>ASCII table</button>
 					<button
+						data-icon="📄"
 						onClick={e => this.copyAs(e.currentTarget, CopyType.LaTeX)}
 						title="Copy this automata as LaTeX"
 					>LaTeX</button>

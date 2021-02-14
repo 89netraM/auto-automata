@@ -181,12 +181,14 @@ export class VisualAutomata extends Component<Properties, {}> {
 	public render(): ReactNode {
 		return (
 			<div className="visual-automata">
-				<div className="copy-buttons">
+				<div className="action-buttons">
 					<button
+						data-icon="📄"
 						onClick={e => this.copyAs(e.currentTarget, CopyType.SVG)}
 						title="Copy this automata as a SVG"
 					>SVG</button>
 					<button
+						data-icon="📄"
 						className={"write" in navigator.clipboard ? null : "save"}
 						onClick={e => this.copyAs(e.currentTarget, CopyType.PNG)}
 						title={"write" in navigator.clipboard ?
