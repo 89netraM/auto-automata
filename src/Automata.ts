@@ -7,6 +7,7 @@ import { formatTable, formatLaTeX } from "./formatter";
 import { constructSubset, constructProduct, constructSum } from "./construction";
 import { fromRegularExpression } from "./from";
 import { isEmpty } from "./emptiness";
+import { equals, equivalenceClasses, stateEquivalenceTable } from "./equals";
 
 /**
  * Represents an automata.
@@ -42,4 +43,7 @@ export const Automata = {
 	constructSum,
 	fromRegularExpression,
 	isEmpty,
+	equivalenceClasses,
+	stateEquivalenceTable,
+	equals,
 };
