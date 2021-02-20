@@ -8,6 +8,7 @@ import { constructSubset, constructProduct, constructSum } from "./construction"
 import { fromRegularExpression } from "./from";
 import { isEmpty } from "./emptiness";
 import { equals, equivalenceClasses, stateEquivalenceTable } from "./equals";
+import { removeUnreachableStates, minimise } from "./minimisation";
 
 /**
  * Represents an automata.
@@ -46,4 +47,6 @@ export const Automata = {
 	equivalenceClasses,
 	stateEquivalenceTable,
 	equals,
+	removeUnreachableStates,
+	minimise,
 };
