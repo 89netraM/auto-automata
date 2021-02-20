@@ -1,5 +1,6 @@
 import React, { Component, ReactNode, MouseEvent } from "react";
 import {
+	AutomataMinimisation,
 	AutomataToRegularExpression,
 	Equality,
 	Readme,
@@ -13,6 +14,7 @@ const pages = {
 	"Readme": <Readme />,
 	"Test Automata": <TestAutomata />,
 	"Automata Equality": <Equality />,
+	"Automata Minimisation": <AutomataMinimisation />,
 	"Subset Construction": <SubsetConstruction />,
 	"Automata to RegExp": <AutomataToRegularExpression />,
 	"Test RegExp": <TestRegularExpression />,

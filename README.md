@@ -35,7 +35,7 @@ Current features and some features that *might* be added in the future.
 - [x] Equality
   - [x] Web App
 - [x] Minimisation
-  - [ ] Web App
+  - [x] Web App
 - [ ] Parsing file formats
   - [x] ASCII table (TMV028/DIT322 specific format)
   - [ ] `.jff` from [JFLAP](http://www.jflap.org/)

@@ -1,11 +1,12 @@
 import React, { Component, ReactNode } from "react";
-import { Automata, StateEquivalenceTable } from "../../../src";
+import { Automata, StateEquivalenceTable as StateEquivalenceTableType } from "../../../src";
+import { StateEquivalenceTable } from "../components/StateEquivalenceTable";
 import { TableAutomata } from "../components/TableAutomata";
 
 interface State {
 	automataA: Automata;
 	automataB: Automata;
-	stateEquivalence: StateEquivalenceTable,
+	stateEquivalence: StateEquivalenceTableType,
 	equals: boolean;
 }
 
@@ -106,32 +107,7 @@ export class Equality extends Component<{}, State> {
 					<section>
 						<h2>Equals: {this.state.equals ? "✔️" : "❌"}</h2>
 						<p>A state equivalence table is built from the two DFAs:</p>
-						<table>
-							<tbody>
-								<tr>
-									<td></td>
-									{
-										Object.keys(this.state.automataB.states).map(k =>
-											<th key={k}>{k}</th>
-										)
-									}
-								</tr>
-								{
-									Object.entries(this.state.stateEquivalence).map(([n, states]) =>
-										<tr key={n}>
-											<th>{n}</th>
-											{
-												Object.entries(states).map(([n, v]) =>
-													<td key={n}>
-														{v ? "✔️" : "❌"}
-													</td>
-												)
-											}
-										</tr>
-									)
-								}
-							</tbody>
-						</table>
+						<StateEquivalenceTable table={this.state.stateEquivalence}/>
 						{
 							this.state.equals ?
 								<p>

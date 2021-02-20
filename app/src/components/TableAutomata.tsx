@@ -84,7 +84,7 @@ export class TableAutomata extends Component<Properties, State> {
 			for (let i = 0; i < s.alphabet.length; i++) {
 				const sTargets = state.transitions[i][0].split(",").map(t => t.trim());
 				const aTargets = a.states[state.name][s.alphabet[i][0]];
-				if (sTargets.length !== aTargets.size) {
+				if (aTargets == null || sTargets.length !== aTargets.size) {
 					return false;
 				}
 				if (!sTargets.every(t => aTargets.has(t))) {
