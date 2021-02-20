@@ -1,9 +1,18 @@
 import React, { Component, ReactNode, MouseEvent } from "react";
-import { AutomataToRegularExpression, Readme, RegularExpressionToAutomata, SubsetConstruction, TestAutomata, TestRegularExpression } from "./pages";
+import {
+	AutomataToRegularExpression,
+	Equality,
+	Readme,
+	RegularExpressionToAutomata,
+	SubsetConstruction,
+	TestAutomata,
+	TestRegularExpression,
+} from "./pages";
 
 const pages = {
 	"Readme": <Readme />,
 	"Test Automata": <TestAutomata />,
+	"Automata Equality": <Equality />,
 	"Subset Construction": <SubsetConstruction />,
 	"Automata to RegExp": <AutomataToRegularExpression />,
 	"Test RegExp": <TestRegularExpression />,

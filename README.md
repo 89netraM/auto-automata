@@ -33,7 +33,7 @@ Current features and some features that *might* be added in the future.
 - [x] Convert to Regular Expression
   - [x] Web App
 - [x] Equality
-  - [ ] Web App
+  - [x] Web App
 - [x] Minimisation
   - [ ] Web App
 - [ ] Parsing file formats

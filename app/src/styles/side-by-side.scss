@@ -1,0 +1,9 @@
+.side-by-side {
+	display: flex;
+
+	> div {
+		flex-grow: 1;
+		flex-basis: 0;
+		overflow-x: auto;
+	}
+}
