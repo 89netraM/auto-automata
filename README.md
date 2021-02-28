@@ -26,8 +26,8 @@ Current features and some features that *might* be added in the future.
   - [ ] Web App
 - [x] Subset Construction
   - [x] Web App
-- [x] Production Construction
-  - [ ] Web App
+- [x] Product Construction
+  - [x] Web App
 - [x] Sum Construction
   - [ ] Web App
 - [x] Convert to Regular Expression

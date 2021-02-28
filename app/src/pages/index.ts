@@ -6,3 +6,4 @@ export * from "./TestAutomata";
 export * from "./TestRegularExpression";
 export * from "./Equality";
 export * from "./AutomataMinimisation";
+export * from "./AutomataProduct";
