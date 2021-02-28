@@ -176,7 +176,7 @@ export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>, step?
 		[...a.alphabet].every(l => b.alphabet.has(l)) &&
 		[...b.alphabet].every(l => a.alphabet.has(l))) {
 		const starting = SubState.name([a.starting, b.starting]);
-		const accepting = cartesianProduct(a.accepting, b.accepting);
+		const accepting = new Set<string>();
 
 		const states: Graph = {};
 
@@ -190,17 +190,20 @@ export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>, step?
 			}
 			return {
 				starting,
-				accepting,
+				accepting: new Set<string>(accepting),
 				states: statesClone,
 				alphabet: new Set(a.alphabet),
 			};
 		};
 
 		const queue = new Array<[string, string]>();
-		const enqueue = (name: string, a: string, b: string): void => {
+		const enqueue = (name: string, aTarget: string, bTarget: string): void => {
 			if (!(name in states)) {
-				queue.push([a, b]);
+				queue.push([aTarget, bTarget]);
 				states[name] = {};
+				if (a.accepting.has(aTarget) || b.accepting.has(bTarget)) {
+					accepting.add(name);
+				}
 			}
 		};
 		enqueue(starting, a.starting, b.starting);
