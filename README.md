@@ -22,8 +22,6 @@ Current features and some features that *might* be added in the future.
 - [x] ε-NFA
 - [x] String tests
   - [x] Web App
-- [ ] Simplification
-  - [ ] Web App
 - [x] Subset Construction
   - [x] Web App
 - [x] Product Construction
