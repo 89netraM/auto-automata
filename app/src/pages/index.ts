@@ -7,3 +7,4 @@ export * from "./TestRegularExpression";
 export * from "./Equality";
 export * from "./AutomataMinimisation";
 export * from "./AutomataProduct";
+export * from "./AutomataSum";

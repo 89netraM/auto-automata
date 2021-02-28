@@ -29,7 +29,7 @@ Current features and some features that *might* be added in the future.
 - [x] Product Construction
   - [x] Web App
 - [x] Sum Construction
-  - [ ] Web App
+  - [x] Web App
 - [x] Convert to Regular Expression
   - [x] Web App
 - [x] Equality
