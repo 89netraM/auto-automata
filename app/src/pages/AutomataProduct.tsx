@@ -45,17 +45,17 @@ export class AutomataProduct extends Component<{}, State> {
 			<>
 				<section>
 					<h2>Automata Product</h2>
-					<p>Enter two automatas construct their product.</p>
+					<p>Enter two DFAs to construct their product.</p>
 					<div className="side-by-side">
 						<div>
-							<p>A</p>
+							<p>DFA A</p>
 							<TableAutomata
 								automata={this.state.automataA}
 								onChange={automataA => this.setState({ automataA })}
 							/>
 						</div>
 						<div>
-							<p>B</p>
+							<p>DFA B</p>
 							<TableAutomata
 								automata={this.state.automataB}
 								onChange={automataB => this.setState({ automataB })}
@@ -73,7 +73,7 @@ export class AutomataProduct extends Component<{}, State> {
 					this.state.steps.length === 0 ? null :
 					<section>
 						<h2>Steps</h2>
-						<p>The steps for production construction of the given automatas.</p>
+						<p>The steps for product construction of the given DFAs.</p>
 						<AutomataSteps steps={this.state.steps}/>
 						<h3>Final result</h3>
 						<TableAutomata

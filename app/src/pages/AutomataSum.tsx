@@ -45,17 +45,17 @@ export class AutomataSum extends Component<{}, State> {
 			<>
 				<section>
 					<h2>Automata Sum</h2>
-					<p>Enter two automatas construct their sum.</p>
+					<p>Enter two DFAs to construct their sum.</p>
 					<div className="side-by-side">
 						<div>
-							<p>A</p>
+							<p>DFA A</p>
 							<TableAutomata
 								automata={this.state.automataA}
 								onChange={automataA => this.setState({ automataA })}
 							/>
 						</div>
 						<div>
-							<p>B</p>
+							<p>DFA B</p>
 							<TableAutomata
 								automata={this.state.automataB}
 								onChange={automataB => this.setState({ automataB })}
@@ -73,7 +73,7 @@ export class AutomataSum extends Component<{}, State> {
 					this.state.steps.length === 0 ? null :
 					<section>
 						<h2>Steps</h2>
-						<p>The steps for sum construction of the given automatas.</p>
+						<p>The steps for sum construction of the given DFAs.</p>
 						<AutomataSteps steps={this.state.steps}/>
 						<h3>Final result</h3>
 						<TableAutomata
