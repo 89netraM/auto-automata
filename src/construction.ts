@@ -122,10 +122,17 @@ export function constructProduct(a: Automata, b: Automata, step?: (a: Automata) 
 		const states: Graph = {};
 
 		const makeAutomata = (): Automata => {
+			const statesClone: Graph = {};
+			for (const state in states) {
+				statesClone[state] = {};
+				for (const symbol in states[state]) {
+					statesClone[state][symbol] = new Set<string>(states[state][symbol]);
+				}
+			}
 			return {
 				starting,
 				accepting,
-				states,
+				states: statesClone,
 				alphabet: new Set(a.alphabet),
 			};
 		};
@@ -174,10 +181,17 @@ export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>, step?
 		const states: Graph = {};
 
 		const makeAutomata = (): Automata => {
+			const statesClone: Graph = {};
+			for (const state in states) {
+				statesClone[state] = {};
+				for (const symbol in states[state]) {
+					statesClone[state][symbol] = new Set<string>(states[state][symbol]);
+				}
+			}
 			return {
 				starting,
 				accepting,
-				states,
+				states: statesClone,
 				alphabet: new Set(a.alphabet),
 			};
 		};
@@ -201,10 +215,6 @@ export function constructSum(a: Readonly<Automata>, b: Readonly<Automata>, step?
 				enqueue(targetName, aTarget, bTarget);
 			}
 			states[SubState.name([aState, bState])] = transitions;
-
-			// if (a.accepting.has(aState) || b.accepting.has(bState)) {
-			// 	accepting.add(SubState.name([aState, bState]));
-			// }
 
 			if (step != null) {
 				step(makeAutomata());
