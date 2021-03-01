@@ -257,6 +257,65 @@ export class ContextFreeGrammar {
 			this.start,
 		);
 	}
+
+	public del(): ContextFreeGrammar;
+	public del(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
+	public del(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+		const productions = new Map<string, Production>();
+
+		const nullableNonTerminals = new Set<string>(this.nullableNonTerminals());
+		const nullNonTerminals = new Set<string>(this.nullNonTerminals(nullableNonTerminals));
+
+		for (const [nt, p] of [...this.productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
+			if (!nullNonTerminals.has(nt)) {
+				const production = new Array<ReadonlyArray<Token>>();
+				for (const s of p) {
+					const sequences = new Array<Array<Token>>(new Array<Token>());
+					for (const token of s) {
+						if (token.kind === TokenKind.Empty ||
+							(token.kind === TokenKind.NonTerminal && nullNonTerminals.has(token.identifier))) {
+							continue;
+						}
+						else if (token.kind === TokenKind.NonTerminal && nullableNonTerminals.has(token.identifier)) {
+							const lengthBefore = sequences.length;
+							for (let i = 0; i < lengthBefore; i++) {
+								sequences.push([...sequences[i]]);
+								sequences[i].push(token);
+							}
+						}
+						else {
+							for (const sequence of sequences) {
+								sequence.push(token);
+							}
+						}
+					}
+					production.push(...sequences.filter(s => s.length > 0));
+				}
+				productions.set(nt, production);
+				step?.(new ContextFreeGrammar(
+					new Set<string>([
+						...productions.keys(),
+						...[...productions.values()].flatMap(p =>
+							p.flatMap(s =>
+								s.filter(t => t.kind === TokenKind.NonTerminal)
+								.map(t => t.identifier)
+							)
+						)
+					]),
+					this.terminals,
+					productions,
+					this.start,
+				));
+			}
+		}
+
+		return new ContextFreeGrammar(
+			productions.keys(),
+			this.terminals,
+			productions,
+			this.start,
+		);
+	}
 	//#endregion Transformations
 
 	//#region Immutable updates
