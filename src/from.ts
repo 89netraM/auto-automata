@@ -3,23 +3,15 @@ import { Automata } from "./Automata";
 import { Graph } from "./Graph";
 import { Nil } from "./RegularExpressions/Nil";
 import { Empty } from "./RegularExpressions/Empty";
+import { generateSymbol } from "./symbolHelpers";
 
 class StateNameGenerator {
-	public static generateName(number: number): string {
-		const bigString = number.toString();
-		let nameString = "s";
-		for (let i = 0; i < bigString.length; i++) {
-			nameString += String.fromCodePoint(bigString.codePointAt(i) + 0x2050);
-		}
-		return nameString;
-	}
-
 	public constructor(
 		public number: number,
 	) { }
 
 	public toString(): string {
-		return StateNameGenerator.generateName(this.number);
+		return generateSymbol("s", this.number);
 	}
 }
 
