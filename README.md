@@ -51,6 +51,11 @@ Current features and some features that *might* be added in the future.
 - [x] Convert to Automata
   - [x] Web App
 
+### Context Free Grammars
+
+- [x] Formatting
+  - [x] LaTeX
+
 ## Library
 
 This project can also be used as a `npm` library for JavaScript or TypeScript.
