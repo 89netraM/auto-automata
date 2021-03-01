@@ -1,4 +1,4 @@
-import { sortBySymbolButFirst } from "../symbolHelpers";
+import { countUpSymbol, sortBySymbolButFirst } from "../symbolHelpers";
 import { ParseTree } from "./ParseTree";
 import { Production, Token, TokenKind } from "./Production";
 
@@ -115,6 +115,59 @@ export class ContextFreeGrammar {
 
 		throw new Error("Failed to construct the parse tree.");
 	}
+
+	//#region Transformations
+	public bin(): ContextFreeGrammar;
+	public bin(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
+	public bin(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+		const productions = new Map<string, Production>();
+		const isAvailable = (s: string) => !this.productions.has(s) && !productions.has(s);
+
+		for (const [nt, p] of [...this.productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
+			const production = new Array<ReadonlyArray<Token>>();
+			let symbol = nt;
+			for (const sequence of p) {
+				if (sequence.length >= 3) {
+					symbol = countUpSymbol(symbol, isAvailable);
+					production.push(new Array<Token>(sequence[0], Token.nonTerminal(symbol)));
+					for (let i = 1; i < sequence.length - 2; i++) {
+						const prev = symbol;
+						symbol = countUpSymbol(symbol, isAvailable);
+						productions.set(
+							prev,
+							new Array<ReadonlyArray<Token>>(
+								new Array<Token>(sequence[i], Token.nonTerminal(symbol))
+							)
+						);
+					}
+					productions.set(
+						symbol,
+						new Array<ReadonlyArray<Token>>(
+							new Array<Token>(sequence[sequence.length - 2], sequence[sequence.length - 1])
+						)
+					);
+				}
+				else {
+					production.push(sequence);
+				}
+			}
+			productions.set(nt, production);
+			step?.(new ContextFreeGrammar(
+				productions.keys(),
+				this.terminals,
+				productions,
+				this.start,
+			));
+		}
+
+		return new ContextFreeGrammar(
+			productions.keys(),
+			this.terminals,
+			productions,
+			this.start,
+		);
+	}
+	//#endregion Transformations
 
 	//#region Immutable updates
 	public addNonTerminal(nonTerminal: string): ContextFreeGrammar {
