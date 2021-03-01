@@ -1,3 +1,4 @@
+import { ParseTree } from "./ParseTree";
 import { Production, Token, TokenKind } from "./Production";
 
 export class ContextFreeGrammar {
@@ -17,7 +18,8 @@ export class ContextFreeGrammar {
 		const checkProduction = (p: Production): boolean => {
 			return p.every(alt => alt.every(t =>
 				(t.kind === TokenKind.NonTerminal && this.nonTerminals.has(t.identifier)) ||
-					(this.terminals.has(t.identifier) || t.identifier === ContextFreeGrammar.emptyString)
+					(t.kind === TokenKind.Terminal && this.terminals.has(t.identifier)) ||
+					t.kind === TokenKind.Empty
 			));
 		};
 		if (productions == null || [...productions].every(([nt, p]) => this.nonTerminals.has(nt) && checkProduction(p))) {
@@ -33,6 +35,84 @@ export class ContextFreeGrammar {
 		else {
 			throw new Error(`Start ("${start}) is not a non-terminal.`);
 		}
+	}
+
+	public parse(string: string): ParseTree | null {
+		const queue = new Array<[Array<Token>, Array<Token>, string]>([new Array<Token>(), [Token.nonTerminal(this.start)], string]);
+		while (queue.length > 0) {
+			const [tree, [token, ...rest], string] = queue.shift();
+			if (token.kind === TokenKind.NonTerminal) {
+				for (const sequence of this.productions.get(token.identifier)) {
+					queue.push([
+						[...tree, token],
+						[...sequence, ...rest],
+						string
+					]);
+				}
+			}
+			else if (token.kind === TokenKind.Terminal) {
+				if (string.startsWith(token.identifier)) {
+					if (string.length === token.identifier.length && rest.length === 0) {
+						return this.constructTree([...tree, token]);
+					}
+					else if (rest.length > 0) {
+						queue.push([
+							[...tree, token],
+							rest,
+							string.substring(token.identifier.length)
+						]);
+					}
+				}
+			}
+			else if (token.kind === TokenKind.Empty) {
+				if (string.length === 0 && rest.length === 0) {
+					return this.constructTree([...tree, token]);
+				}
+				else if (rest.length > 0) {
+					queue.push([
+						[...tree, token],
+						rest,
+						string
+					]);
+				}
+			}
+		}
+		return null;
+	}
+	private constructTree(tokens: ReadonlyArray<Token>): ParseTree;
+	private constructTree(tokens: ReadonlyArray<Token>, start: number): [number, ParseTree];
+	private constructTree(tokens: ReadonlyArray<Token>, start?: number): ParseTree | [number, ParseTree]{
+		const nonTerminal = tokens[start ?? 0];
+		const base = (start ?? 0) + 1
+
+		alternatives: for (const sequence of this.productions.get(nonTerminal.identifier)) {
+			const children = new Array<ParseTree | string>();
+			let skips = 0;
+			for (let i = 0; i < sequence.length && base + skips + i < tokens.length; i++) {
+				const token = tokens[base + skips + i];
+				if (token.equals(sequence[i])) {
+					if (token.kind === TokenKind.NonTerminal) {
+						const [skip, subTree] = this.constructTree(tokens, base + skips + i);
+						children.push(subTree);
+						skips += skip;
+					}
+					else {
+						children.push(token.identifier);
+					}
+				}
+				else {
+					continue alternatives;
+				}
+			}
+			if (start == null) {
+				return new ParseTree(nonTerminal.identifier, children);
+			}
+			else {
+				return [skips + sequence.length, new ParseTree(nonTerminal.identifier, children)];
+			}
+		}
+
+		throw new Error("Failed to construct the parse tree.");
 	}
 
 	//#region Immutable updates
