@@ -316,6 +316,77 @@ export class ContextFreeGrammar {
 			this.start,
 		);
 	}
+
+	public unit(): ContextFreeGrammar;
+	public unit(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
+	public unit(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+		const productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
+
+		const isCircular = (target: string, production: Production, seen: ReadonlySet<string>): boolean => {
+			for (const sequence of production) {
+				if (sequence.length === 1 && sequence[0].kind === TokenKind.NonTerminal) {
+					if (sequence[0].identifier === target) {
+						return true;
+					}
+					else {
+						if (isCircular(
+							target,
+							productions.get(sequence[0].identifier),
+							new Set<string>([...seen, sequence[0].identifier])
+						)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		};
+
+		let changeHappened: boolean;
+		do {
+			changeHappened = false;
+
+			const changes = new Array<[string, Array<[number, Array<Array<Token>>]>]>();
+			for (const [nonTerminal, production] of productions) {
+				const productionChanges = new Array<[number, Array<Array<Token>>]>();
+				for (let i = 0; i < production.length; i++) {
+					const sequence = production[i];
+					if (sequence.length === 1 &&
+						sequence[0].kind === TokenKind.NonTerminal &&
+						!isCircular(sequence[0].identifier, productions.get(sequence[0].identifier), new Set<string>())
+					) {
+						productionChanges.push([i, productions.get(sequence[0].identifier).map(s => [...s])]);
+						changeHappened = true;
+					}
+				}
+				changes.push([nonTerminal, productionChanges]);
+			}
+			for (const [nonTerminal, productionChanges] of changes) {
+				const production = productions.get(nonTerminal);
+				let offset = 0;
+				for (const [i, alts] of productionChanges) {
+					production.splice(offset + i, 1, ...alts);
+					offset += alts.length - 1;
+				}
+			}
+
+			if (changeHappened) {
+				step?.(new ContextFreeGrammar(
+					this.nonTerminals,
+					this.terminals,
+					productions,
+					this.start,
+				));
+			}
+		} while (changeHappened);
+
+		return new ContextFreeGrammar(
+			this.nonTerminals,
+			this.terminals,
+			productions,
+			this.start,
+		);
+	}
 	//#endregion Transformations
 
 	//#region Immutable updates
