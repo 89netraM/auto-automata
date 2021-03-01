@@ -144,6 +144,34 @@ export class ContextFreeGrammar {
 
 		return gamma;
 	}
+
+	public nullableNonTerminals(): Array<string>;
+	public nullableNonTerminals(step: (symbols: Array<string>) => void): Array<string>;
+	public nullableNonTerminals(step?: (symbols: Array<string>) => void): Array<string> {
+		const E = new Array<string>();
+
+		let changeHappened: boolean;
+		do {
+			changeHappened = false;
+			step?.([...E]);
+
+			const change = new Array<string>();
+			for (const [nonTerminal, production] of this.productions) {
+				if (E.every(nt => nt !== nonTerminal)) {
+					alternatives: for (const sequence of production) {
+						if (sequence.every(token => token.kind === TokenKind.Empty || E.some(nt => token.identifier === nt))) {
+							change.push(nonTerminal);
+							changeHappened = true;
+							break alternatives;
+						}
+					}
+				}
+			}
+			E.push(...change);
+		} while (changeHappened);
+
+		return E;
+	}
 	//#endregion Computations
 
 	//#region Transformations
