@@ -116,6 +116,36 @@ export class ContextFreeGrammar {
 		throw new Error("Failed to construct the parse tree.");
 	}
 
+	//#region Computations
+	public generatingSymbols(): Array<Token>;
+	public generatingSymbols(step: (symbols: Array<Token>) => void): Array<Token>;
+	public generatingSymbols(step?: (symbols: Array<Token>) => void): Array<Token> {
+		const gamma = [...this.terminals].map(i => Token.terminal(i));
+
+		let changeHappened: boolean;
+		do {
+			changeHappened = false;
+			step?.([...gamma]);
+
+			const change = new Array<Token>();
+			for (const [nt, production] of this.productions) {
+				if (gamma.every(t => t.kind !== TokenKind.NonTerminal || t.identifier !== nt)) {
+					alternatives: for (const sequence of production) {
+						if (sequence.every(token => token.kind === TokenKind.Empty || gamma.some(t => t.equals(token)))) {
+							change.push(Token.nonTerminal(nt));
+							changeHappened = true;
+							break alternatives;
+						}
+					}
+				}
+			}
+			gamma.push(...change);
+		} while (changeHappened);
+
+		return gamma;
+	}
+	//#endregion Computations
+
 	//#region Transformations
 	public bin(): ContextFreeGrammar;
 	public bin(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
