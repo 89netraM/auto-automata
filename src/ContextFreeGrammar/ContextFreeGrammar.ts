@@ -493,13 +493,20 @@ export class ContextFreeGrammar {
 		return "(\\{" +
 			[...this.nonTerminals].join(", ") +
 			"\\}, \\{" +
-			[...this.terminals].join(", ") +
+			[...this.terminals].map(t => `\\text{${t}}`).join(", ") +
 			"\\}, P, " +
 			this.start +
 			") \\\\[0.5em]\n\\begin{aligned}\n\tP: " +
 			[...this.productions]
 				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
-				.map(([nt, p]) => `${nt} &→ ${p.map(alt => alt.map(t => t.identifier).join("")).join(" \\mid ")}`)
+				.map(([nt, p]) => `${nt} &→ ${
+					p.map(alt =>
+						alt.map(t => t.kind === TokenKind.Terminal ?
+							`\\text{${t.identifier}}` :
+							t.identifier
+						).join("")
+					).join(" \\mid ")}`
+				)
 				.join(" \\\\\n\t") +
 			"\n\\end{aligned}";
 	}
