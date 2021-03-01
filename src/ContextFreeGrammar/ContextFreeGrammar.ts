@@ -172,6 +172,38 @@ export class ContextFreeGrammar {
 
 		return E;
 	}
+
+	public nullNonTerminals(): Array<string>;
+	public nullNonTerminals(step: (symbols: Array<string>) => void): Array<string>;
+	public nullNonTerminals(nullableNonTerminals: Iterable<string>): Array<string>;
+	public nullNonTerminals(nullableNonTerminals: Iterable<string>, step: (symbols: Array<string>) => void): Array<string>;
+	public nullNonTerminals(a?: Iterable<string> | ((symbols: Array<string>) => void), b?: (symbols: Array<string>) => void): Array<string> {
+		const nts = a instanceof Function || a == null ? this.nonTerminals : a;
+		const step = a instanceof Function ? a : b;
+
+		const nullNT = new Array<string>();
+
+		let changeHappened: boolean;
+		do {
+			changeHappened = false;
+			step?.([...nullNT]);
+
+			const change = new Array<string>();
+			for (const nonTerminal of nts) {
+				if (nullNT.every(nt => nt !== nonTerminal) && this.productions.get(nonTerminal)
+					.every(a => a.every(t => t.kind === TokenKind.Empty ||
+						(t.kind === TokenKind.NonTerminal && nullNT.some(nt => t.identifier === nt)))
+					)
+				) {
+					change.push(nonTerminal);
+					changeHappened = true;
+				}
+			}
+			nullNT.push(...change);
+		} while (changeHappened);
+
+		return nullNT;
+	}
 	//#endregion Computations
 
 	//#region Transformations
