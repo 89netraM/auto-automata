@@ -10,7 +10,7 @@ export function generateSymbol(symbol: string, number: number): string {
 }
 
 const numberFinder = /^(.*?)([₀-₉]*)$/;
-export function readNumber(symbol: string): [string, number] | null {
+export function readNumber(symbol: string): [string, number] {
 	const result = numberFinder.exec(symbol);
 	if (result != null && result[2].length > 0) {
 		return [
@@ -23,18 +23,51 @@ export function readNumber(symbol: string): [string, number] | null {
 		];
 	}
 	else {
-		return null;
+		return [symbol, 0];
 	}
 }
 
 export function countUpSymbol(symbol: string): string;
 export function countUpSymbol(symbol: string, isAvailable: (symbol: string) => boolean): string;
 export function countUpSymbol(symbol: string, isAvailable?: (symbol: string) => boolean): string {
-	let [symbolName, number] = readNumber(symbol) ?? [symbol, 0];
+	let [symbolName, number] = readNumber(symbol);
 	let outSymbol: string;
 	do {
 		number++;
 		outSymbol = generateSymbol(symbolName, number);
 	} while (!(isAvailable?.(outSymbol) ?? true));
 	return outSymbol;
+}
+
+export function sortBySymbol(a: string, b: string): number {
+	const [aSymbol, aNumber] = readNumber(a);
+	const [bSymbol, bNumber] = readNumber(b);
+	if (aSymbol < bSymbol) {
+		return -1;
+	}
+	else if (aSymbol > bSymbol) {
+		return 1;
+	}
+	else {
+		return aNumber - bNumber;
+	}
+}
+export function sortBySymbolButFirst(a: string, b: string, first: string): number {
+	const [aSymbol, aNumber] = readNumber(a);
+	const [bSymbol, bNumber] = readNumber(b);
+	if (aSymbol === first && bSymbol !== first) {
+		return -1;
+	}
+	else if (aSymbol !== first && bSymbol === first) {
+		return 1;
+	}
+	else if (aSymbol < bSymbol) {
+		return -1;
+	}
+	else if (aSymbol > bSymbol) {
+		return 1;
+	}
+	else {
+		return aNumber - bNumber;
+	}
 }

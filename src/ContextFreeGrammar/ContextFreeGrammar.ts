@@ -1,3 +1,4 @@
+import { sortBySymbolButFirst } from "../symbolHelpers";
 import { ParseTree } from "./ParseTree";
 import { Production, Token, TokenKind } from "./Production";
 
@@ -223,7 +224,10 @@ export class ContextFreeGrammar {
 			"\\}, P, " +
 			this.start +
 			") \\\\[0.5em]\n\\begin{aligned}\n\tP: " +
-			[...this.productions].map(([nt, p]) => `${nt} &→ ${p.map(alt => alt.map(t => t.identifier).join("")).join(" \\mid ")}`).join(" \\\\\n\t") +
+			[...this.productions]
+				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
+				.map(([nt, p]) => `${nt} &→ ${p.map(alt => alt.map(t => t.identifier).join("")).join(" \\mid ")}`)
+				.join(" \\\\\n\t") +
 			"\n\\end{aligned}";
 	}
 }

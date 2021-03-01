@@ -1,5 +1,6 @@
 import { Automata } from "./Automata";
 import { Graph } from "./Graph";
+import { sortBySymbolButFirst } from "./symbolHelpers";
 
 export function formatTable(a: Readonly<Automata>): string {
 	const transitions = Object.values(a.states).some(s => Graph.Epsilon in s) ? [Graph.Epsilon, ...a.alphabet] : [...a.alphabet];
@@ -10,7 +11,7 @@ export function formatTable(a: Readonly<Automata>): string {
 	return [
 		`\t${transitions.join("\t")}`,
 		...Object.entries(a.states)
-			.sort()
+			.sort(([x, _x], [y, _y]) => sortBySymbolButFirst(x, y, a.starting))
 			.map(
 				([key, value]) =>
 					(a.starting === key ? "→ " : "") +
@@ -35,7 +36,7 @@ export function formatLaTeX(a: Readonly<Automata>): string {
 		[
 			`\t& ${transitions.map(l => `\\textbf{${l}}`).join(" & ")}`,
 			...Object.entries(a.states)
-				.sort()
+				.sort(([x, _x], [y, _y]) => sortBySymbolButFirst(x, y, a.starting))
 				.map(
 					([key, value]) =>
 						"\t" +

@@ -1,5 +1,6 @@
 import React, { Component, ReactNode, KeyboardEvent } from "react";
 import { Automata, Graph } from "../../../src";
+import { sortBySymbolButFirst } from "../../../src/symbolHelpers";
 import { compareAutomatas, uuid } from "../utils";
 
 export interface Properties {
@@ -36,7 +37,12 @@ export class TableAutomata extends Component<Properties, State> {
 			const transitions = new Array<[string, boolean]>();
 			for (const symbol of alphabet) {
 				if (symbol in a.states[name]) {
-					transitions.push([[...a.states[name][symbol]].sort().join(", "), true]);
+					transitions.push([
+						[...a.states[name][symbol]]
+							.sort(([x, _x], [y, _y]) => sortBySymbolButFirst(x, y, a.starting))
+							.join(", "),
+						true
+					]);
 				}
 				else {
 					transitions.push(["", true]);
