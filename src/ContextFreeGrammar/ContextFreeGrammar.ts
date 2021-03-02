@@ -626,7 +626,7 @@ export class ContextFreeGrammar {
 			[...this.terminals].map(t => `\\text{${t}}`).join(", ") +
 			"\\}, P, " +
 			this.start +
-			") \\\\[0.5em]\n\\begin{aligned}\n\tP: " +
+			") \\\\[0.5em]\nP \\begin{cases}\\begin{aligned}\n\t" +
 			[...this.productions]
 				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
 				.map(([nt, p]) => `${nt} &→ ${
@@ -638,6 +638,6 @@ export class ContextFreeGrammar {
 					).join(" \\mid ")}`
 				)
 				.join(" \\\\\n\t") +
-			"\n\\end{aligned}";
+			"\n\\end{aligned}\\end{cases}";
 	}
 }
