@@ -1,4 +1,5 @@
 import { countUpSymbol, sortBySymbolButFirst } from "../symbolHelpers";
+import { CYKTable } from "./CYKTable";
 import { ParseTree } from "./ParseTree";
 import { Production, Token, TokenKind } from "./Production";
 
@@ -203,6 +204,70 @@ export class ContextFreeGrammar {
 		} while (changeHappened);
 
 		return nullNT;
+	}
+
+	public cyk(string: string): CYKTable;
+	public cyk(string: string, step: (table: CYKTable) => void): CYKTable;
+	public cyk(string: string, step?: (table: CYKTable) => void): CYKTable {
+		const cfg = this.cnf();
+		const table = new CYKTable(string);
+		const callStep = () => step?.(new CYKTable(table));
+
+		const getSequencesFor = (part: string): Array<Array<string>> => {
+			const sequences = new Array<Array<string>>();
+			for (let s = 1; s < part.length; s++) {
+				const start = table.get(part.substring(0, s));
+				const end = table.get(part.substring(s));
+				if (start != null && end != null) {
+					start.forEach(s => end.forEach(e => sequences.push(new Array<string>(s, e))));
+				}
+			}
+			return sequences;
+		};
+
+		for (const i of string) {
+			if (!table.has(i)) {
+				table.set(
+					i,
+					new Set<string>(
+						[...cfg.productions]
+							.filter(([_, p]) => p.some(s => s.length === 1 && s[0].kind === TokenKind.Terminal && s[0].identifier === i))
+							.map(([nt, _]) => nt)
+					)
+				);
+			}
+		}
+		callStep();
+
+		for (let l = 2; l <= string.length; l++) {
+			for (let i = 0; i <= string.length - l; i++) {
+				const part = string.substr(i, l);
+				if (!table.has(part)) {
+					const seqs = getSequencesFor(part);
+					table.set(
+						part,
+						new Set<string>(
+							[...cfg.productions]
+								.filter(([_, p]) =>
+									p.some(s =>
+										seqs.some(seq =>
+											seq.every((t, i) =>
+												i < s.length &&
+												s[i].kind === TokenKind.NonTerminal &&
+												s[i].identifier === t
+											)
+										)
+									)
+								)
+								.map(([nt, _]) => nt)
+						)
+					);
+				}
+			}
+			callStep();
+		}
+
+		return table;
 	}
 	//#endregion Computations
 
