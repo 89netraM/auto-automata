@@ -53,8 +53,26 @@ Current features and some features that *might* be added in the future.
 
 ### Context Free Grammars
 
-- [x] Formatting
+- [x] Parsing strings
+  - [x] Constructing parse trees
+    - [ ] Web App
+  - [x] Constructing CYK tables
+    - [ ] Web App
+- [x] Transformations
+  - [x] Bin
+    - [ ] Web App
+  - [x] Del
+    - [ ] Web App
+  - [x] Unit
+    - [ ] Web App
+  - [x] Term
+    - [ ] Web App
+  - [x] Chomsky Normal Form
+    - [ ] Web App
+- [ ] Parsing file formats
+- [ ] Formatting file formats
   - [x] LaTeX
+  - [ ] [JFLAP](http://www.jflap.org/)
 
 ## Library
 
