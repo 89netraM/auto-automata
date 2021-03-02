@@ -3,6 +3,7 @@
 		"alwaysStrict": true,
 		"esModuleInterop": true,
 		"jsx": "react",
+		"lib": ["DOM", "ES2019"],
 		"module": "CommonJS",
 		"moduleResolution": "node",
 		"outDir": "dist",
