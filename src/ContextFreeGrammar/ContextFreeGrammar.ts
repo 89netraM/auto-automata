@@ -387,6 +387,52 @@ export class ContextFreeGrammar {
 			this.start,
 		);
 	}
+
+	public term(): ContextFreeGrammar;
+	public term(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
+	public term(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+		const productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
+
+		const terminalProductions = new Map<string, string>([...productions]
+			.filter(([_, p]) => p.length === 1 && p[0].length === 1 && p[0][0].kind === TokenKind.Terminal)
+			.map(([nt, p]) => [p[0][0].identifier, nt])
+		);
+
+		for (const [_, production] of [...productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
+			let changeHappened = false;
+			for (const sequence of production) {
+				if (sequence.length >= 2) {
+					for (let i = 0; i < sequence.length; i++) {
+						if (sequence[i].kind === TokenKind.Terminal) {
+							let replacement = terminalProductions.get(sequence[i].identifier);
+							if (replacement == null) {
+								replacement = countUpSymbol("T", s => !productions.has(s));
+								terminalProductions.set(sequence[i].identifier, replacement);
+								productions.set(replacement, new Array<Array<Token>>(new Array<Token>(Token.terminal(sequence[i].identifier))));
+							}
+							sequence.splice(i, 1, Token.nonTerminal(replacement));
+							changeHappened = true;
+						}
+					}
+				}
+			}
+			if (changeHappened) {
+				step?.(new ContextFreeGrammar(
+					productions.keys(),
+					this.terminals,
+					productions,
+					this.start,
+				));
+			}
+		}
+
+		return new ContextFreeGrammar(
+			productions.keys(),
+			this.terminals,
+			productions,
+			this.start,
+		);
+	}
 	//#endregion Transformations
 
 	//#region Immutable updates
