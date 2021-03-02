@@ -1,21 +1,7 @@
 @import "@89netram/snygg/src/vars";
 
 .visual-automata {
-	overflow-x: auto;
-
-	.action-buttons {
-		position: sticky;
-		left: 0px;
-		text-align: end;
-	}
-
 	svg {
-		min-width: 100%;
-	
-		text {
-			fill: var(--color);
-		}
-	
 		.node {
 			circle {
 				stroke: var(--color);
@@ -28,16 +14,6 @@
 			}
 			&.accepting circle {
 				stroke-width: 3px;
-			}
-		}
-	
-		.edgePath {
-			font-family: monospace;
-	
-			path {
-				stroke: var(--color);
-				fill: var(--color);
-				stroke-width: 1.5px;
 			}
 		}
 	}
