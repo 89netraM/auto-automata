@@ -446,6 +446,12 @@ export class ContextFreeGrammar {
 			this.start,
 		);
 	}
+
+	public cnf(): ContextFreeGrammar;
+	public cnf(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
+	public cnf(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+		return this.bin(step).del(step).unit(step).term(step);
+	}
 	//#endregion Transformations
 
 	//#region Immutable updates
