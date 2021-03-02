@@ -243,7 +243,15 @@ export class ContextFreeGrammar {
 			}
 			productions.set(nt, production);
 			step?.(new ContextFreeGrammar(
-				productions.keys(),
+				new Set<string>([
+					...productions.keys(),
+					...[...productions.values()].flatMap(p =>
+						p.flatMap(s =>
+							s.filter(t => t.kind === TokenKind.NonTerminal)
+							.map(t => t.identifier)
+						)
+					)
+				]),
 				this.terminals,
 				productions,
 				this.start,
