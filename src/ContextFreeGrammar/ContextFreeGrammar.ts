@@ -360,11 +360,16 @@ export class ContextFreeGrammar {
 				for (let i = 0; i < production.length; i++) {
 					const sequence = production[i];
 					if (sequence.length === 1 &&
-						sequence[0].kind === TokenKind.NonTerminal &&
-						!isCircular(sequence[0].identifier, productions.get(sequence[0].identifier), new Set<string>())
+						sequence[0].kind === TokenKind.NonTerminal
 					) {
-						productionChanges.push([i, productions.get(sequence[0].identifier).map(s => [...s])]);
-						changeHappened = true;
+						if (nonTerminal === sequence[0].identifier) {
+							productionChanges.push([i, new Array<Array<Token>>()]);
+							changeHappened = true;
+						}
+						else if (!isCircular(sequence[0].identifier, productions.get(sequence[0].identifier), new Set<string>())) {
+							productionChanges.push([i, productions.get(sequence[0].identifier).map(s => [...s])]);
+							changeHappened = true;
+						}
 					}
 				}
 				changes.push([nonTerminal, productionChanges]);
