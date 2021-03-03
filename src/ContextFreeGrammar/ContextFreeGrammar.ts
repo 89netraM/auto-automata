@@ -32,7 +32,7 @@ export class ContextFreeGrammar {
 		}
 
 		if (start == null || this.nonTerminals.has(start)) {
-			this.start = start ?? "";
+			this.start = start;
 		}
 		else {
 			throw new Error(`Start ("${start}) is not a non-terminal.`);
@@ -40,42 +40,44 @@ export class ContextFreeGrammar {
 	}
 
 	public parse(string: string): ParseTree | null {
-		const queue = new Array<[Array<Token>, Array<Token>, string]>([new Array<Token>(), [Token.nonTerminal(this.start)], string]);
-		while (queue.length > 0) {
-			const [tree, [token, ...rest], string] = queue.shift();
-			if (token.kind === TokenKind.NonTerminal) {
-				for (const sequence of this.productions.get(token.identifier)) {
-					queue.push([
-						[...tree, token],
-						[...sequence, ...rest],
-						string
-					]);
+		if (this.start != null) {
+			const queue = new Array<[Array<Token>, Array<Token>, string]>([new Array<Token>(), [Token.nonTerminal(this.start)], string]);
+			while (queue.length > 0) {
+				const [tree, [token, ...rest], string] = queue.shift();
+				if (token.kind === TokenKind.NonTerminal) {
+					for (const sequence of this.productions.get(token.identifier)) {
+						queue.push([
+							[...tree, token],
+							[...sequence, ...rest],
+							string
+						]);
+					}
 				}
-			}
-			else if (token.kind === TokenKind.Terminal) {
-				if (string.startsWith(token.identifier)) {
-					if (string.length === token.identifier.length && rest.length === 0) {
+				else if (token.kind === TokenKind.Terminal) {
+					if (string.startsWith(token.identifier)) {
+						if (string.length === token.identifier.length && rest.length === 0) {
+							return this.constructTree([...tree, token]);
+						}
+						else if (rest.length > 0) {
+							queue.push([
+								[...tree, token],
+								rest,
+								string.substring(token.identifier.length)
+							]);
+						}
+					}
+				}
+				else if (token.kind === TokenKind.Empty) {
+					if (string.length === 0 && rest.length === 0) {
 						return this.constructTree([...tree, token]);
 					}
 					else if (rest.length > 0) {
 						queue.push([
 							[...tree, token],
 							rest,
-							string.substring(token.identifier.length)
+							string
 						]);
 					}
-				}
-			}
-			else if (token.kind === TokenKind.Empty) {
-				if (string.length === 0 && rest.length === 0) {
-					return this.constructTree([...tree, token]);
-				}
-				else if (rest.length > 0) {
-					queue.push([
-						[...tree, token],
-						rest,
-						string
-					]);
 				}
 			}
 		}
@@ -181,6 +183,12 @@ export class ContextFreeGrammar {
 	public nullNonTerminals(a?: Iterable<string> | ((symbols: Array<string>) => void), b?: (symbols: Array<string>) => void): Array<string> {
 		const nts = a instanceof Function || a == null ? this.nonTerminals : a;
 		const step = a instanceof Function ? a : b;
+
+		for (const nonTerminal of nts) {
+			if (!this.nonTerminals.has(nonTerminal)) {
+				throw new Error("Not all elements in `nullableNonTerminals` are members of this CFGs non-terminals.");
+			}
+		}
 
 		const nullNT = new Array<string>();
 
