@@ -1,4 +1,4 @@
-import { Automata } from "../../../src";
+import { Automata } from "auto-automata";
 import { compareAutomatas } from "./compareAutomatas";
 
 describe("Comparing Automatas →", () => {

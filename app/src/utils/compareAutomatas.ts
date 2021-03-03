@@ -1,4 +1,4 @@
-import { Automata, Graph } from "../../../src";
+import { Automata, Graph } from "auto-automata";
 
 function hasAllRight(a: Graph, b: Graph): boolean {
 	for (const state in a) {

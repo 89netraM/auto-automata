@@ -1,5 +1,5 @@
 import React, { Component, ReactNode, KeyboardEvent } from "react";
-import { Automata, Graph } from "../../../src";
+import { Automata, Graph } from "auto-automata";
 import { sortBySymbolButFirst } from "../../../src/symbolHelpers";
 import { compareAutomatas, uuid } from "../utils";
 

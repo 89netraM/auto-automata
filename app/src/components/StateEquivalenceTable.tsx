@@ -1,5 +1,5 @@
 import React from "react";
-import { StateEquivalenceTable as StateEquivalenceTableType } from "../../../src";
+import { StateEquivalenceTable as StateEquivalenceTableType } from "auto-automata";
 
 export interface Properties {
 	table: StateEquivalenceTableType;

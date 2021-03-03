@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { RegularExpressions as RE } from "../../../src";
+import { RegularExpressions as RE } from "auto-automata";
 
 export interface Properties {
 	expression: RE.RegularExpression;

@@ -1,7 +1,7 @@
 import { Selection } from "d3-selection";
 import { curveBasis } from "d3-shape";
 import { graphlib } from "dagre-d3";
-import { Automata } from "../../../src";
+import { Automata } from "auto-automata";
 import { GraphBase } from "./GraphBase";
 
 export interface Properties {

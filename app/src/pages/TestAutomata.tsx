@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { Automata } from "../../../src";
+import { Automata } from "auto-automata";
 import { TableAutomata } from "../components/TableAutomata";
 import { uuid } from "../utils";
 

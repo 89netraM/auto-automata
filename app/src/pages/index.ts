@@ -8,3 +8,4 @@ export * from "./Equality";
 export * from "./AutomataMinimisation";
 export * from "./AutomataProduct";
 export * from "./AutomataSum";
+export * from "./CFGParseTree";

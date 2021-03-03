@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { Automata, RegularExpressions as RE } from "../../../src";
+import { Automata, RegularExpressions as RE } from "auto-automata";
 import { AutomataSteps } from "../components/AutomataSteps";
 import { RegularExpressionBox } from "../components/RegularExpressionBox";
 import { TableAutomata } from "../components/TableAutomata";

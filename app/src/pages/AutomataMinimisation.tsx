@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { Automata, StateEquivalenceTable as StateEquivalenceTableType } from "../../../src";
+import { Automata, StateEquivalenceTable as StateEquivalenceTableType } from "auto-automata";
 import { StateEquivalenceTable } from "../components/StateEquivalenceTable";
 import { TableAutomata } from "../components/TableAutomata";
 import { VisualAutomata } from "../components/VisualAutomata";

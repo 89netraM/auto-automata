@@ -1,5 +1,5 @@
 import React, { Component, createRef, ReactNode, RefObject } from "react";
-import { Automata } from "../../../src";
+import { Automata } from "auto-automata";
 import { renderPNG } from "../utils";
 import { VisualAutomata } from "./VisualAutomata";
 
