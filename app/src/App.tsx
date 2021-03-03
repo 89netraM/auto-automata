@@ -26,7 +26,7 @@ const pages = {
 } as const;
 
 interface State {
-	active: string;
+	active: keyof typeof pages;
 	navVisible: boolean;
 }
 
@@ -40,7 +40,7 @@ export class App extends Component<{}, State> {
 		};
 	}
 
-	private navigateTo(e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>, path: string): void {
+	private navigateTo(e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>, path: keyof typeof pages): void {
 		e.preventDefault();
 		this.setState({
 			active: path,
@@ -69,7 +69,7 @@ export class App extends Component<{}, State> {
 				</header>
 				<nav className={this.state.navVisible ? "visible" : null}>
 					<ul>
-						{Object.keys(pages).map(name =>
+						{(Object.keys(pages) as Array<keyof typeof pages>).map(name =>
 							<li key={name}
 								className={name === this.state.active ? "active" : ""}>
 								<a href={name}
