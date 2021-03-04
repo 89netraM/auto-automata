@@ -627,15 +627,22 @@ export class ContextFreeGrammar {
 	}
 	//#endregion Immutable updates
 
-	public formatUTF8(): string {
-		return [...this.productions]
-			.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
-			.map(([nt, p]) => `${nt}→${
-				p.map(alt =>
-					alt.map(t => t.identifier).join("")
-				).join("|")}`
-			)
-			.join("\n");
+	public formatUTF8(): string | null {
+		if ([...this.nonTerminals].every(nt => ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) &&
+			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t))
+		) {
+			return [...this.productions]
+				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
+				.map(([nt, p]) => `${nt}→${
+					p.map(alt =>
+						alt.map(t => t.identifier).join("")
+					).join("|")}`
+				)
+				.join("\n");
+		}
+		else {
+			return null;
+		}
 	}
 
 	public formatLaTeX(): string {
