@@ -627,6 +627,17 @@ export class ContextFreeGrammar {
 	}
 	//#endregion Immutable updates
 
+	public formatUTF8(): string {
+		return [...this.productions]
+			.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
+			.map(([nt, p]) => `${nt} → ${
+				p.map(alt =>
+					alt.map(t => t.identifier).join("")
+				).join(" | ")}`
+			)
+			.join("\n");
+	}
+
 	public formatLaTeX(): string {
 		return "(\\{" +
 			[...this.nonTerminals].join(", ") +

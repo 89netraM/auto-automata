@@ -70,8 +70,11 @@ Current features and some features that *might* be added in the future.
   - [x] Chomsky Normal Form
     - [ ] Web App
 - [ ] Parsing file formats
+  - [ ] UTF8
+  - [ ] [JFLAP](http://www.jflap.org/)
 - [ ] Formatting file formats
   - [x] LaTeX
+  - [x] UTF8
   - [ ] [JFLAP](http://www.jflap.org/)
 
 ## Library
