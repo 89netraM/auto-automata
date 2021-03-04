@@ -19,6 +19,7 @@ interface State {
 enum CopyType {
 	UTF8,
 	LaTeX,
+	JFLAP,
 }
 
 function tokenKindToId(kind: CFG.TokenKind): string {
@@ -315,6 +316,9 @@ export class CFGTable extends Component<Properties, State> {
 				case CopyType.LaTeX:
 					text = this.buildCFG().formatLaTeX();
 					break;
+				case CopyType.JFLAP:
+					text = this.buildCFG().formatJFLAP();
+					break;
 				default:
 					throw null;
 			}
@@ -409,6 +413,11 @@ export class CFGTable extends Component<Properties, State> {
 						onClick={e => this.copyAs(e.currentTarget, CopyType.LaTeX)}
 						title="Copy this CFG as LaTeX"
 					>LaTeX</button>
+					<button
+						data-icon="📄"
+						onClick={e => this.copyAs(e.currentTarget, CopyType.JFLAP)}
+						title="Copy this CFG as a JFLAP file"
+					><code>.jff</code></button>
 				</div>
 			</div>
 		);
