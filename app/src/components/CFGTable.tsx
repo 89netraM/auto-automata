@@ -38,19 +38,17 @@ function tokenIdToKind(id: string): CFG.TokenKind {
 }
 
 export class CFGTable extends Component<Properties, State> {
-	public constructor(props: Properties) {
-		super(props);
-
-		if (this.props.cfg != null) {
-			const nonTerminalIds = new Map<string, string>([...this.props.cfg.nonTerminals].map(nt => [nt, uuid()]));
-			const terminalIds = new Map<string, string>([...this.props.cfg.terminals].map(nt => [nt, uuid()]));
-			this.state = {
-				nonTerminals: [...this.props.cfg.nonTerminals].map(nt => [nonTerminalIds.get(nt), nt, true]),
+	private static stateFromCFG(cfg: CFG.ContextFreeGrammar): State {
+		if (cfg != null) {
+			const nonTerminalIds = new Map<string, string>([...cfg.nonTerminals].map(nt => [nt, uuid()]));
+			const terminalIds = new Map<string, string>([...cfg.terminals].map(nt => [nt, uuid()]));
+			return {
+				nonTerminals: [...cfg.nonTerminals].map(nt => [nonTerminalIds.get(nt), nt, true]),
 				addNonTerminal: ["", true],
-				terminals: [...this.props.cfg.terminals].map(t => [terminalIds.get(t), t, true]),
+				terminals: [...cfg.terminals].map(t => [terminalIds.get(t), t, true]),
 				addTerminal: ["", true],
-				start: this.props.cfg.start,
-				productions: [...this.props.cfg.productions].map(([nt, alts]) => [
+				start: nonTerminalIds.get(cfg.start),
+				productions: [...cfg.productions].map(([nt, alts]) => [
 					nonTerminalIds.get(nt),
 					alts.map(seq => seq.map(t => [
 						t.kind === CFG.TokenKind.NonTerminal ? nonTerminalIds.get(t.identifier) :
@@ -61,7 +59,7 @@ export class CFGTable extends Component<Properties, State> {
 			};
 		}
 		else {
-			this.state = {
+			return {
 				nonTerminals: new Array<[string, string, boolean]>(),
 				addNonTerminal: ["", true],
 				terminals: new Array<[string, string, boolean]>(),
@@ -70,6 +68,12 @@ export class CFGTable extends Component<Properties, State> {
 				productions: new Array<[string, Array<Array<[string, CFG.TokenKind]>>]>(),
 			};
 		}
+	}
+
+	public constructor(props: Properties) {
+		super(props);
+
+		this.state = CFGTable.stateFromCFG(this.props.cfg);
 	}
 
 	public shouldComponentUpdate(nextProps: Properties, nextState: State): boolean {
@@ -305,6 +309,26 @@ export class CFGTable extends Component<Properties, State> {
 		}
 	}
 
+	private async paste(button: HTMLButtonElement): Promise<void> {
+		button.classList.remove("success", "fail");
+		try {
+			const text = await navigator.clipboard.readText();
+			let cfg = CFG.ContextFreeGrammar.parseJFLAP(text);
+			if (cfg == null) {
+				cfg = CFG.ContextFreeGrammar.parseUTF8(text);
+				if (cfg == null) {
+					throw null;
+				}
+			}
+			await this.setState(CFGTable.stateFromCFG(cfg));
+			this.sendUpdate();
+			button.classList.add("success");
+		}
+		catch {
+			setTimeout(() => button.classList.add("fail"));
+		}
+	}
+
 	private async copyAs(button: HTMLButtonElement, type: CopyType): Promise<void> {
 		button.classList.remove("success", "fail");
 		try {
@@ -338,6 +362,13 @@ export class CFGTable extends Component<Properties, State> {
 	public render(): ReactNode {
 		return (
 			<div className="cfg-table">
+				<div className="action-buttons">
+					<button
+						data-icon="📋"
+						onClick={e => this.paste(e.currentTarget)}
+						title="Either a JFLAP of UTF-8 file"
+					>Paste CFG</button>
+				</div>
 				<p>
 					(&#123;
 						{
