@@ -322,8 +322,13 @@ export class CFGTable extends Component<Properties, State> {
 				default:
 					throw null;
 			}
-			await navigator.clipboard.writeText(text);
-			button.classList.add("success");
+			if (text != null) {
+				await navigator.clipboard.writeText(text);
+				button.classList.add("success");
+			}
+			else {
+				throw null;
+			}
 		}
 		catch {
 			setTimeout(() => button.classList.add("fail"));
