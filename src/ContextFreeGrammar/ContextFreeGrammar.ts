@@ -627,6 +627,54 @@ export class ContextFreeGrammar {
 	}
 	//#endregion Immutable updates
 
+	//#region "File formats"
+	private static readonly jflapMatcher = /^<structure>.*<type>grammar<\/type>.*<\/structure>$/s;
+	private static readonly jflapProduction = /<production>.*?<left>(.)<\/left>.*?<right>(.*?)<\/right>.*?<\/production>/sg;
+	public static parseJFLAP(jff: string): ContextFreeGrammar | null {
+		jff = jff.trim();
+		if (ContextFreeGrammar.jflapMatcher.test(jff)) {
+			const productions = new Map<string, Array<Array<Token>>>();
+			const terminals = new Set<string>();
+			let start: string = null;
+
+			let match: RegExpExecArray;
+			while ((match = ContextFreeGrammar.jflapProduction.exec(jff)) != null) {
+				const [_, nt, seq] = match;
+				if (ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) {
+					const tokenSeq = seq.length === 0 ?
+						new Array<Token>(Token.empty()) :
+						[...seq].map(c =>
+							ContextFreeGrammar.jflapNonTerminalMatcher.test(c) ?
+								Token.nonTerminal(c) :
+								(terminals.add(c), Token.terminal(c)));
+					if (productions.has(nt)) {
+						productions.get(nt).push(tokenSeq);
+					}
+					else {
+						productions.set(nt, new Array<Array<Token>>(tokenSeq));
+					}
+
+					if (start == null) {
+						start = nt;
+					}
+				}
+				else {
+					return null;
+				}
+			}
+
+			return new ContextFreeGrammar(
+				productions.keys(),
+				terminals,
+				productions,
+				start,
+			);
+		}
+		else {
+			return null;
+		}
+	}
+
 	public formatUTF8(): string | null {
 		if ([...this.nonTerminals].every(nt => ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) &&
 			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t))
@@ -688,4 +736,5 @@ export class ContextFreeGrammar {
 			return null;
 		}
 	}
+	//#endregion "File formats"
 }
