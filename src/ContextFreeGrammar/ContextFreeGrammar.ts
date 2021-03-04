@@ -630,10 +630,10 @@ export class ContextFreeGrammar {
 	public formatUTF8(): string {
 		return [...this.productions]
 			.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
-			.map(([nt, p]) => `${nt} → ${
+			.map(([nt, p]) => `${nt}→${
 				p.map(alt =>
 					alt.map(t => t.identifier).join("")
-				).join(" | ")}`
+				).join("|")}`
 			)
 			.join("\n");
 	}
