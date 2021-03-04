@@ -89,7 +89,7 @@ export class ContextFreeGrammar {
 		const nonTerminal = tokens[start ?? 0];
 		const base = (start ?? 0) + 1
 
-		alternatives: for (const sequence of this.productions.get(nonTerminal.identifier)) {
+		alternatives: for (const sequence of [...this.productions.get(nonTerminal.identifier)].sort((a, b) => b.length - a.length)) {
 			const children = new Array<ParseTree | string>();
 			let skips = 0;
 			for (let i = 0; i < sequence.length && base + skips + i < tokens.length; i++) {
