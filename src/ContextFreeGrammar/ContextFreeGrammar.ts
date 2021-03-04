@@ -659,4 +659,18 @@ export class ContextFreeGrammar {
 				.join(" \\\\\n\t") +
 			"\n\\end{aligned}\\end{cases}";
 	}
+
+	public formatJFLAP(): string {
+		return "<structure>\n\t<type>grammar</type>\n" +
+			[...this.productions]
+				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
+				.flatMap(([nt, p]) => p.map(alt =>
+					"\t<production>\n" +
+					`\t\t<left>${nt}</left>\n` +
+					`\t\t<right>${alt.map(t => t.identifier).join("")}</right>\n` +
+					"\t</production>\n"
+				))
+				.join("") +
+			"</structure>";
+	}
 }

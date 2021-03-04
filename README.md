@@ -71,11 +71,11 @@ Current features and some features that *might* be added in the future.
     - [ ] Web App
 - [ ] Parsing file formats
   - [ ] UTF8
-  - [ ] [JFLAP](http://www.jflap.org/)
-- [ ] Formatting file formats
+  - [ ] `.jff` from [JFLAP](http://www.jflap.org/)
+- [x] Formatting file formats
   - [x] LaTeX
   - [x] UTF8
-  - [ ] [JFLAP](http://www.jflap.org/)
+  - [x] `.jff` from [JFLAP](http://www.jflap.org/)
 
 ## Library
 
