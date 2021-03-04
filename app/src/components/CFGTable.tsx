@@ -17,6 +17,7 @@ interface State {
 }
 
 enum CopyType {
+	UTF8,
 	LaTeX,
 }
 
@@ -308,6 +309,9 @@ export class CFGTable extends Component<Properties, State> {
 		try {
 			let text: string;
 			switch (type) {
+				case CopyType.UTF8:
+					text = this.buildCFG().formatUTF8();
+					break;
 				case CopyType.LaTeX:
 					text = this.buildCFG().formatLaTeX();
 					break;
@@ -397,8 +401,13 @@ export class CFGTable extends Component<Properties, State> {
 				<div className="action-buttons">
 					<button
 						data-icon="📄"
+						onClick={e => this.copyAs(e.currentTarget, CopyType.UTF8)}
+						title="Copy this CFG as a UTF-8 file"
+					>UTF-8</button>
+					<button
+						data-icon="📄"
 						onClick={e => this.copyAs(e.currentTarget, CopyType.LaTeX)}
-						title="Copy this automata as LaTeX"
+						title="Copy this CFG as LaTeX"
 					>LaTeX</button>
 				</div>
 			</div>
