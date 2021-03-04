@@ -669,11 +669,13 @@ export class ContextFreeGrammar {
 		}
 	}
 
-	private static readonly jflapMatcher = /^<structure>.*<type>grammar<\/type>.*<\/structure>$/s;
-	private static readonly jflapProduction = /<production>.*?<left>(.)<\/left>.*?<right>(.*?)<\/right>.*?<\/production>/sg;
+	private static readonly jflapMatcher = /<structure>(.*)<type>grammar<\/type>(.*)<\/structure>/s;
+	private static readonly jflapProduction = /<production>.*?<left>(.)<\/left>.*?(?:<right>(.*?)<\/right>|<right.*?\/>).*?<\/production>/sg;
 	public static parseJFLAP(jff: string): ContextFreeGrammar | null {
 		jff = jff.trim();
-		if (ContextFreeGrammar.jflapMatcher.test(jff)) {
+		const structureMatch = ContextFreeGrammar.jflapMatcher.exec(jff);
+		if (structureMatch != null && structureMatch.length >= 3) {
+			jff = structureMatch[1] + structureMatch[2];
 			const productions = new Map<string, Array<Array<Token>>>();
 			const terminals = new Set<string>();
 			let start: string = null;
@@ -682,7 +684,7 @@ export class ContextFreeGrammar {
 			while ((match = ContextFreeGrammar.jflapProduction.exec(jff)) != null) {
 				const [_, nt, seq] = match;
 				if (ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) {
-					const tokenSeq = seq.length === 0 ?
+					const tokenSeq = seq == null || seq.length === 0 ?
 						new Array<Token>(Token.empty()) :
 						[...seq].map(c =>
 							ContextFreeGrammar.jflapNonTerminalMatcher.test(c) ?
@@ -760,15 +762,19 @@ export class ContextFreeGrammar {
 	public formatJFLAP(): string | null {
 		if ([...this.nonTerminals].every(nt => ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) &&
 			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t)) &&
-			[...this.productions].every(([_, alts]) => alts.every(seq => seq.every(t => t.kind !== TokenKind.Empty) || seq.length === 1))
+			[...this.productions].every(([_, alts]) => alts.every(seq => seq.every(t => t.kind !== TokenKind.Empty) || seq.length <= 1))
 		) {
-			return "<structure>\n\t<type>grammar</type>\n" +
+			return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<structure>\n\t<type>grammar</type>\n` +
 				[...this.productions]
 					.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
-					.flatMap(([nt, p]) => p.map(alt =>
+					.flatMap(([nt, alts]) => alts.map(seq =>
 						"\t<production>\n" +
 						`\t\t<left>${nt}</left>\n` +
-						`\t\t<right>${alt.map(t => t.identifier).join("")}</right>\n` +
+						(
+							seq.length === 0 || (seq.length === 1 && seq[0].kind === TokenKind.Empty) ?
+								"\t\t<right/>\n" :
+								`\t\t<right>${seq.map(t => t.identifier).join("")}</right>\n`
+						) +
 						"\t</production>\n"
 					))
 					.join("") +
