@@ -718,7 +718,7 @@ export class ContextFreeGrammar {
 
 	public formatUTF8(): string | null {
 		if ([...this.nonTerminals].every(nt => ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) &&
-			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t))
+			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t) && t !== Token.emptyString)
 		) {
 			return [...this.productions]
 				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
@@ -759,7 +759,8 @@ export class ContextFreeGrammar {
 	private static readonly jflapNonTerminalMatcher = /^[A-Z]$/;
 	public formatJFLAP(): string | null {
 		if ([...this.nonTerminals].every(nt => ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) &&
-			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t))
+			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t)) &&
+			[...this.productions].every(([_, alts]) => alts.every(seq => seq.every(t => t.kind !== TokenKind.Empty) || seq.length === 1))
 		) {
 			return "<structure>\n\t<type>grammar</type>\n" +
 				[...this.productions]
