@@ -660,17 +660,25 @@ export class ContextFreeGrammar {
 			"\n\\end{aligned}\\end{cases}";
 	}
 
-	public formatJFLAP(): string {
-		return "<structure>\n\t<type>grammar</type>\n" +
-			[...this.productions]
-				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
-				.flatMap(([nt, p]) => p.map(alt =>
-					"\t<production>\n" +
-					`\t\t<left>${nt}</left>\n` +
-					`\t\t<right>${alt.map(t => t.identifier).join("")}</right>\n` +
-					"\t</production>\n"
-				))
-				.join("") +
-			"</structure>";
+	private static readonly jflapNonTerminalMatcher = /^[A-Z]$/;
+	public formatJFLAP(): string | null {
+		if ([...this.nonTerminals].every(nt => ContextFreeGrammar.jflapNonTerminalMatcher.test(nt)) &&
+			[...this.terminals].every(t => t.length === 1 && !ContextFreeGrammar.jflapNonTerminalMatcher.test(t))
+		) {
+			return "<structure>\n\t<type>grammar</type>\n" +
+				[...this.productions]
+					.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
+					.flatMap(([nt, p]) => p.map(alt =>
+						"\t<production>\n" +
+						`\t\t<left>${nt}</left>\n` +
+						`\t\t<right>${alt.map(t => t.identifier).join("")}</right>\n` +
+						"\t</production>\n"
+					))
+					.join("") +
+				"</structure>";
+		}
+		else {
+			return null;
+		}
 	}
 }
