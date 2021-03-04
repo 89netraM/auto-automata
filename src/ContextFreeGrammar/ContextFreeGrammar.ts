@@ -644,7 +644,7 @@ export class ContextFreeGrammar {
 			"\\}, \\{" +
 			[...this.terminals].map(t => `\\text{${t}}`).join(", ") +
 			"\\}, P, " +
-			this.start +
+			(this.start ?? "") +
 			") \\\\[0.5em]\nP \\begin{cases}\\begin{aligned}\n\t" +
 			[...this.productions]
 				.sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))
