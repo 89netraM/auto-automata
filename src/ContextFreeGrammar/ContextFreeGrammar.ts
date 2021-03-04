@@ -628,6 +628,47 @@ export class ContextFreeGrammar {
 	//#endregion Immutable updates
 
 	//#region "File formats"
+	private static readonly utf8Matcher = /(.)→(.*)/s;
+	private static readonly utf8Production = /(.)→(.*)/g;
+	public static parseUTF8(utf8: string): ContextFreeGrammar | null {
+		utf8 = utf8.trim();
+		if (ContextFreeGrammar.utf8Matcher.test(utf8)) {
+			const productions = new Map<string, Array<Array<Token>>>();
+			const terminals = new Set<string>();
+			let start: string = null;
+
+			let match: RegExpExecArray;
+			while ((match = ContextFreeGrammar.utf8Production.exec(utf8)) != null) {
+				const [_, nt, alts] = match;
+				productions.set(
+					nt,
+					alts.split("|").map(seq =>
+							seq.length === 0 ?
+								new Array<Token>(Token.empty()) :
+								[...seq].map(c =>
+									c === Token.emptyString ?
+										Token.empty() :
+										ContextFreeGrammar.jflapNonTerminalMatcher.test(c) ?
+											Token.nonTerminal(c) :
+											(terminals.add(c), Token.terminal(c))))
+				);
+				if (start == null) {
+					start = nt;
+				}
+			}
+
+			return new ContextFreeGrammar(
+				productions.keys(),
+				terminals,
+				productions,
+				start,
+			);
+		}
+		else {
+			return null;
+		}
+	}
+
 	private static readonly jflapMatcher = /^<structure>.*<type>grammar<\/type>.*<\/structure>$/s;
 	private static readonly jflapProduction = /<production>.*?<left>(.)<\/left>.*?<right>(.*?)<\/right>.*?<\/production>/sg;
 	public static parseJFLAP(jff: string): ContextFreeGrammar | null {
