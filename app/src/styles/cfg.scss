@@ -1,0 +1,40 @@
+.parse-tree {
+	svg {
+		.node {
+			rect {
+				fill: none;
+			}
+		}
+	}
+}
+
+.cfg-table {
+	p {
+		font-family: "Times New Roman", Times, serif;
+		font-size: 1.25em;
+		margin-bottom: 0px;
+
+		input {
+			display: inline-block;
+			width: calc(4ch + 1rem);
+			text-align: center;
+		}
+	}
+
+	.p-table {
+		font-family: "Times New Roman", Times, serif;
+		font-size: 1.25em;
+		display: flex;
+		align-items: center;
+
+		th {
+			text-align: end;
+		}
+		.alternative {
+			border-inline-end: 1px solid var(--color);
+		}
+		td:not(:last-child) select {
+			width: calc(5ch + 2rem);
+		}
+	}
+}

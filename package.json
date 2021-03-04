@@ -11,7 +11,7 @@
 		"start": "webpack-cli serve --config=app/webpack.config.js"
 	},
 	"devDependencies": {
-		"@89netram/snygg": "github:89netram/snygg#v1.0.5",
+		"@89netram/snygg": "github:89netraM/snygg#v1.0.6",
 		"@babel/core": "^7.12.16",
 		"@babel/preset-react": "^7.12.13",
 		"@types/d3-selection": "^2.0.0",
