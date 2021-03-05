@@ -12,3 +12,4 @@ export * from "./CFGParseTree";
 export * from "./CFGBin";
 export * from "./CFGDel";
 export * from "./CFGUnit";
+export * from "./CFGTerm";

@@ -7,6 +7,7 @@ import {
 	CFGBin,
 	CFGDel,
 	CFGParseTree,
+	CFGTerm,
 	CFGUnit,
 	Equality,
 	Readme,
@@ -31,6 +32,7 @@ const pages = {
 	"CFG Bin Transform": <CFGBin />,
 	"CFG Del Transform": <CFGDel />,
 	"CFG Unit Transform": <CFGUnit />,
+	"CFG Term Transform": <CFGTerm />,
 } as const;
 
 interface State {
