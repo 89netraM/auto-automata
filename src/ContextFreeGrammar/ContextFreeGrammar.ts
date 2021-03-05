@@ -1,4 +1,4 @@
-import { countUpSymbol, sortBySymbolButFirst } from "../symbolHelpers";
+import { countUpLetterSymbol, sortBySymbolButFirst } from "../symbolHelpers";
 import { CYKTable } from "./CYKTable";
 import { ParseTree } from "./ParseTree";
 import { Production, Token, TokenKind } from "./Production";
@@ -291,11 +291,11 @@ export class ContextFreeGrammar {
 			let symbol = nt;
 			for (const sequence of p) {
 				if (sequence.length >= 3) {
-					symbol = countUpSymbol(symbol, isAvailable);
+					symbol = countUpLetterSymbol(symbol, isAvailable);
 					production.push(new Array<Token>(sequence[0], Token.nonTerminal(symbol)));
 					for (let i = 1; i < sequence.length - 2; i++) {
 						const prev = symbol;
-						symbol = countUpSymbol(symbol, isAvailable);
+						symbol = countUpLetterSymbol(symbol, isAvailable);
 						productions.set(
 							prev,
 							new Array<ReadonlyArray<Token>>(
@@ -492,7 +492,7 @@ export class ContextFreeGrammar {
 						if (sequence[i].kind === TokenKind.Terminal) {
 							let replacement = terminalProductions.get(sequence[i].identifier);
 							if (replacement == null) {
-								replacement = countUpSymbol("T", s => !productions.has(s));
+								replacement = countUpLetterSymbol("T", s => !productions.has(s));
 								terminalProductions.set(sequence[i].identifier, replacement);
 								productions.set(replacement, new Array<Array<Token>>(new Array<Token>(Token.terminal(sequence[i].identifier))));
 							}
