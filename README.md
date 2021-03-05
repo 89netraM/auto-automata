@@ -60,7 +60,7 @@ Current features and some features that *might* be added in the future.
     - [ ] Web App
 - [x] Transformations
   - [x] Bin
-    - [ ] Web App
+    - [x] Web App
   - [x] Del
     - [ ] Web App
   - [x] Unit

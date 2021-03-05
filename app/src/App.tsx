@@ -4,6 +4,7 @@ import {
 	AutomataProduct,
 	AutomataSum,
 	AutomataToRegularExpression,
+	CFGBin,
 	CFGParseTree,
 	Equality,
 	Readme,
@@ -25,6 +26,7 @@ const pages = {
 	"Test RegExp": <TestRegularExpression />,
 	"RegExp to Automata": <RegularExpressionToAutomata />,
 	"CFG Parse Tree": <CFGParseTree />,
+	"CFG Bin Transform": <CFGBin />,
 } as const;
 
 interface State {
