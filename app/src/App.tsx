@@ -5,6 +5,7 @@ import {
 	AutomataSum,
 	AutomataToRegularExpression,
 	CFGBin,
+	CFGCNF,
 	CFGDel,
 	CFGParseTree,
 	CFGTerm,
@@ -33,6 +34,7 @@ const pages = {
 	"CFG Del Transform": <CFGDel />,
 	"CFG Unit Transform": <CFGUnit />,
 	"CFG Term Transform": <CFGTerm />,
+	"CFG CNF": <CFGCNF />,
 } as const;
 
 interface State {
