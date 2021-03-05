@@ -64,7 +64,7 @@ Current features and some features that *might* be added in the future.
   - [x] Del
     - [x] Web App
   - [x] Unit
-    - [ ] Web App
+    - [x] Web App
   - [x] Term
     - [ ] Web App
   - [x] Chomsky Normal Form

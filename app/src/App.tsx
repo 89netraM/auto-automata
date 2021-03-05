@@ -7,6 +7,7 @@ import {
 	CFGBin,
 	CFGDel,
 	CFGParseTree,
+	CFGUnit,
 	Equality,
 	Readme,
 	RegularExpressionToAutomata,
@@ -29,6 +30,7 @@ const pages = {
 	"CFG Parse Tree": <CFGParseTree />,
 	"CFG Bin Transform": <CFGBin />,
 	"CFG Del Transform": <CFGDel />,
+	"CFG Unit Transform": <CFGUnit />,
 } as const;
 
 interface State {
