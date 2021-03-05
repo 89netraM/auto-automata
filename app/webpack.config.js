@@ -13,7 +13,7 @@ module.exports = {
 				use: "ts-loader"
 			},
 			{
-				test: /\.scss$/,
+				test: /\.s?css$/,
 				use: [
 					"style-loader",
 					"css-loader",
@@ -31,7 +31,11 @@ module.exports = {
 					},
 					"markdown-to-react-loader"
 				]
-			}
+			},
+			{
+				test: /\.(ttf|woff2?)$/,
+				use: "file-loader"
+			},
 		]
 	},
 	resolve: {

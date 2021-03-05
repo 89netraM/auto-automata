@@ -1,6 +1,8 @@
 import React, { ChangeEvent, Component, ReactNode } from "react";
 import { ContextFreeGrammar as CFG } from "auto-automata";
 import { uuid } from "src/utils";
+import "katex/dist/katex.min.css";
+import TeX from "@matejmazur/react-katex";
 
 export interface Properties {
 	cfg: CFG.ContextFreeGrammar;
@@ -362,6 +364,44 @@ export class CFGTable extends Component<Properties, State> {
 	public render(): ReactNode {
 		return (
 			<div className="cfg-table">
+				{
+					this.props.readonly ?
+						this.renderStatic() :
+						this.renderInteractive()
+				}
+				<div className="action-buttons">
+					<button
+						data-icon="📄"
+						onClick={e => this.copyAs(e.currentTarget, CopyType.UTF8)}
+						title="Copy this CFG as a UTF-8 file"
+					>UTF-8</button>
+					<button
+						data-icon="📄"
+						onClick={e => this.copyAs(e.currentTarget, CopyType.LaTeX)}
+						title="Copy this CFG as LaTeX"
+					>LaTeX</button>
+					<button
+						data-icon="📄"
+						onClick={e => this.copyAs(e.currentTarget, CopyType.JFLAP)}
+						title="Copy this CFG as a JFLAP file"
+					><code>.jff</code></button>
+				</div>
+			</div>
+		);
+	}
+	private renderStatic(): ReactNode {
+		const cfg = this.buildCFG();
+		return (
+			<TeX
+				math={cfg.formatLaTeX()}
+				settings={{ strict: false }}
+				block={true}
+			/>
+		);
+	}
+	private renderInteractive(): ReactNode {
+		return (
+			<>
 				<div className="action-buttons">
 					<button
 						data-icon="📋"
@@ -438,24 +478,7 @@ export class CFGTable extends Component<Properties, State> {
 					</select>)
 				</p>
 				{this.renderPTable()}
-				<div className="action-buttons">
-					<button
-						data-icon="📄"
-						onClick={e => this.copyAs(e.currentTarget, CopyType.UTF8)}
-						title="Copy this CFG as a UTF-8 file"
-					>UTF-8</button>
-					<button
-						data-icon="📄"
-						onClick={e => this.copyAs(e.currentTarget, CopyType.LaTeX)}
-						title="Copy this CFG as LaTeX"
-					>LaTeX</button>
-					<button
-						data-icon="📄"
-						onClick={e => this.copyAs(e.currentTarget, CopyType.JFLAP)}
-						title="Copy this CFG as a JFLAP file"
-					><code>.jff</code></button>
-				</div>
-			</div>
+			</>
 		);
 	}
 	private renderPTable(): ReactNode {
