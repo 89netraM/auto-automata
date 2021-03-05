@@ -57,7 +57,7 @@ Current features and some features that *might* be added in the future.
   - [x] Constructing parse trees
     - [x] Web App
   - [x] Constructing CYK tables
-    - [ ] Web App
+    - [x] Web App
 - [x] Transformations
   - [x] Bin
     - [x] Web App

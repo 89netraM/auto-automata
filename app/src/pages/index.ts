@@ -14,3 +14,4 @@ export * from "./CFGDel";
 export * from "./CFGUnit";
 export * from "./CFGTerm";
 export * from "./CFGCNF";
+export * from "./CFGCYK";
