@@ -344,21 +344,32 @@ export class ContextFreeGrammar {
 	}
 
 	public del(): ContextFreeGrammar;
-	public del(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
-	public del(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
-		const productions = new Map<string, Production>();
+	public del(step: StepCallback<ContextFreeGrammar>): ContextFreeGrammar;
+	public del(step?: StepCallback<ContextFreeGrammar>): ContextFreeGrammar {
+		const productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
 
 		const nullableNonTerminals = new Set<string>(this.nullableNonTerminals());
 		const nullNonTerminals = new Set<string>(this.nullNonTerminals(nullableNonTerminals));
 
-		for (const [nt, p] of [...this.productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
+		for (const [nt, p] of [...productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
+			let changeHappened = false;
+			let changeDescription: string = null;
 			if (!nullNonTerminals.has(nt)) {
-				const production = new Array<ReadonlyArray<Token>>();
+				const factoredOut = new Array<string>();
+				const removed = new Array<string>();
+				let removedEmpty = false;
+				let production = new Array<Array<Token>>();
 				for (const s of p) {
 					const sequences = new Array<Array<Token>>(new Array<Token>());
 					for (const token of s) {
-						if (token.kind === TokenKind.Empty ||
-							(token.kind === TokenKind.NonTerminal && nullNonTerminals.has(token.identifier))) {
+						if (token.kind === TokenKind.Empty) {
+							removedEmpty = true;
+							changeHappened = true;
+							continue;
+						}
+						else if (token.kind === TokenKind.NonTerminal && nullNonTerminals.has(token.identifier)) {
+							removed.push(token.identifier);
+							changeHappened = true;
 							continue;
 						}
 						else if (token.kind === TokenKind.NonTerminal && nullableNonTerminals.has(token.identifier)) {
@@ -367,6 +378,8 @@ export class ContextFreeGrammar {
 								sequences.push([...sequences[i]]);
 								sequences[i].push(token);
 							}
+							factoredOut.push(token.identifier);
+							changeHappened = true;
 						}
 						else {
 							for (const sequence of sequences) {
@@ -376,21 +389,44 @@ export class ContextFreeGrammar {
 					}
 					production.push(...sequences.filter(s => s.length > 0));
 				}
-				productions.set(nt, production);
-				step?.(new ContextFreeGrammar(
-					new Set<string>([
-						...productions.keys(),
-						...[...productions.values()].flatMap(p =>
-							p.flatMap(s =>
-								s.filter(t => t.kind === TokenKind.NonTerminal)
-								.map(t => t.identifier)
-							)
-						)
-					]),
-					this.terminals,
-					productions,
-					this.start,
-				));
+				production = production.filter(a => a.length > 0);
+				if (production.length > 0) {
+					productions.set(nt, production);
+					if (changeHappened) {
+						const changes = new Array<string>();
+						if (removed.length > 0) {
+							changes.push(`null producing non-terminal${removed.length > 1 ? "s" : ""} ${descriptionNaturalList(removed)} were removed`);
+						}
+						if (factoredOut.length > 0) {
+							changes.push(`nullable non-terminal${factoredOut.length > 1 ? "s" : ""} ${descriptionNaturalList(factoredOut)} were factored out`);
+						}
+						if (removedEmpty) {
+							changes.push("empty string tokens were removed");
+						}
+						changeDescription = `From the production of ${nt}, ${descriptionNaturalList(changes)}.`;
+					}
+				}
+				else {
+					productions.delete(nt);
+					changeHappened = true;
+					changeDescription = `The non-terminal ${nt} only produced the empty string, and where thus removed.`;
+				}
+			}
+			else {
+				productions.delete(nt);
+				changeHappened = true;
+				changeDescription = `The non-terminal ${nt} only produced the empty string, and where thus removed.`;
+			}
+			if (changeHappened) {
+				step?.(
+					new ContextFreeGrammar(
+						productions.keys(),
+						this.terminals,
+						productions,
+						this.start,
+					),
+					changeDescription
+				);
 			}
 		}
 
