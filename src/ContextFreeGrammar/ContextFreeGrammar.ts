@@ -1,3 +1,4 @@
+import { descriptionNaturalList, StepCallback } from "../Steps";
 import { countUpLetterSymbol, sortBySymbolButFirst } from "../symbolHelpers";
 import { CYKTable } from "./CYKTable";
 import { ParseTree } from "./ParseTree";
@@ -281,54 +282,57 @@ export class ContextFreeGrammar {
 
 	//#region Transformations
 	public bin(): ContextFreeGrammar;
-	public bin(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
-	public bin(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
-		const productions = new Map<string, Production>();
-		const isAvailable = (s: string) => !this.productions.has(s) && !productions.has(s);
+	public bin(step: StepCallback<ContextFreeGrammar>): ContextFreeGrammar;
+	public bin(step?: StepCallback<ContextFreeGrammar>): ContextFreeGrammar {
+		const productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
+		const isAvailable = (s: string) => !productions.has(s);
 
-		for (const [nt, p] of [...this.productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
-			const production = new Array<ReadonlyArray<Token>>();
+		for (const [nt, p] of [...productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
+			let changeHappened = false;
+			const production = new Array<Array<Token>>();
 			let symbol = nt;
+			const newSymbols = new Array<string>();
 			for (const sequence of p) {
 				if (sequence.length >= 3) {
 					symbol = countUpLetterSymbol(symbol, isAvailable);
+					newSymbols.push(symbol);
 					production.push(new Array<Token>(sequence[0], Token.nonTerminal(symbol)));
 					for (let i = 1; i < sequence.length - 2; i++) {
 						const prev = symbol;
 						symbol = countUpLetterSymbol(symbol, isAvailable);
+						newSymbols.push(symbol);
 						productions.set(
 							prev,
-							new Array<ReadonlyArray<Token>>(
+							new Array<Array<Token>>(
 								new Array<Token>(sequence[i], Token.nonTerminal(symbol))
 							)
 						);
 					}
 					productions.set(
 						symbol,
-						new Array<ReadonlyArray<Token>>(
+						new Array<Array<Token>>(
 							new Array<Token>(sequence[sequence.length - 2], sequence[sequence.length - 1])
 						)
 					);
+					changeHappened = true;
 				}
 				else {
-					production.push(sequence);
+					production.push(new Array<Token>(...sequence));
 				}
 			}
 			productions.set(nt, production);
-			step?.(new ContextFreeGrammar(
-				new Set<string>([
-					...productions.keys(),
-					...[...productions.values()].flatMap(p =>
-						p.flatMap(s =>
-							s.filter(t => t.kind === TokenKind.NonTerminal)
-							.map(t => t.identifier)
-						)
-					)
-				]),
-				this.terminals,
-				productions,
-				this.start,
-			));
+			if (changeHappened) {
+				step?.(
+					new ContextFreeGrammar(
+						productions.keys(),
+						this.terminals,
+						productions,
+						this.start,
+					),
+					`Alternatives in production ${nt} is split up into smaller productions. ` +
+						`New non-terminals are ${descriptionNaturalList(newSymbols)}.`
+				);
+			}
 		}
 
 		return new ContextFreeGrammar(
