@@ -130,15 +130,17 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Bin</h4>
 								{
-									this.state.steps.bin.map(([cfg, desc], i) =>
-										<div key={i}>
-											<p>{desc}</p>
-											<CFGTable
-												cfg={cfg}
-												readonly={true}
-											/>
-										</div>
-									)
+									this.state.steps.bin.length === 0 ?
+										<p>No transformation needed.</p> :
+										this.state.steps.bin.map(([cfg, desc], i) =>
+											<div key={i}>
+												<p>{desc}</p>
+												<CFGTable
+													cfg={cfg}
+													readonly={true}
+												/>
+											</div>
+										)
 								}
 								<br/>
 								<hr/>
@@ -149,15 +151,17 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Del</h4>
 								{
-									this.state.steps.del.map(([cfg, desc], i) =>
-										<div key={i}>
-											<p>{desc}</p>
-											<CFGTable
-												cfg={cfg}
-												readonly={true}
-											/>
-										</div>
-									)
+									this.state.steps.del.length === 0 ?
+										<p>No transformation needed.</p> :
+										this.state.steps.del.map(([cfg, desc], i) =>
+											<div key={i}>
+												<p>{desc}</p>
+												<CFGTable
+													cfg={cfg}
+													readonly={true}
+												/>
+											</div>
+										)
 								}
 								<br/>
 								<hr/>
@@ -168,15 +172,17 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Unit</h4>
 								{
-									this.state.steps.unit.map(([cfg, desc], i) =>
-										<div key={i}>
-											<p>{desc}</p>
-											<CFGTable
-												cfg={cfg}
-												readonly={true}
-											/>
-										</div>
-									)
+									this.state.steps.unit.length === 0 ?
+										<p>No transformation needed.</p> :
+										this.state.steps.unit.map(([cfg, desc], i) =>
+											<div key={i}>
+												<p>{desc}</p>
+												<CFGTable
+													cfg={cfg}
+													readonly={true}
+												/>
+											</div>
+										)
 								}
 								<br/>
 								<hr/>
@@ -187,15 +193,17 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Term</h4>
 								{
-									this.state.steps.term.map(([cfg, desc], i) =>
-										<div key={i}>
-											<p>{desc}</p>
-											<CFGTable
-												cfg={cfg}
-												readonly={true}
-											/>
-										</div>
-									)
+									this.state.steps.term.length === 0 ?
+										<p>No transformation needed.</p> :
+										this.state.steps.term.map(([cfg, desc], i) =>
+											<div key={i}>
+												<p>{desc}</p>
+												<CFGTable
+													cfg={cfg}
+													readonly={true}
+												/>
+											</div>
+										)
 								}
 								<br/>
 								<hr/>

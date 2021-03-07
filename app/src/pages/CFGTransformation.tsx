@@ -4,7 +4,7 @@ import { CFGTable } from "../components/CFGTable";
 
 interface State {
 	cfg: CFG.ContextFreeGrammar;
-	steps: Array<[CFG.ContextFreeGrammar, string]>;
+	steps: Array<[CFG.ContextFreeGrammar, string]> | null;
 }
 
 export abstract class CFGTransformation extends Component<{}, State> {
@@ -17,7 +17,7 @@ export abstract class CFGTransformation extends Component<{}, State> {
 
 		this.state = {
 			cfg: new CFG.ContextFreeGrammar(),
-			steps: new Array<[CFG.ContextFreeGrammar, string]>(),
+			steps: null,
 		};
 
 		this.transform = this.transform.bind(this);
@@ -49,19 +49,21 @@ export abstract class CFGTransformation extends Component<{}, State> {
 					</button>
 				</section>
 				{
-					this.state.steps.length === 0 ? null :
+					this.state.steps == null ? null :
 					<section>
 						<h3>Transformation Steps</h3>
 						{
-							this.state.steps.map(([cfg, desc], i) =>
-								<div key={i}>
-									<p>{desc}</p>
-									<CFGTable
-										cfg={cfg}
-										readonly={true}
-									/>
-								</div>
-							)
+							this.state.steps.length === 0 ?
+								<p>No transformation needed.</p> :
+								this.state.steps.map(([cfg, desc], i) =>
+									<div key={i}>
+										<p>{desc}</p>
+										<CFGTable
+											cfg={cfg}
+											readonly={true}
+										/>
+									</div>
+								)
 						}
 					</section>
 				}
