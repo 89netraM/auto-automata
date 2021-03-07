@@ -563,8 +563,8 @@ export class ContextFreeGrammar {
 	}
 
 	public cnf(): ContextFreeGrammar;
-	public cnf(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
-	public cnf(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+	public cnf(step: StepCallback<ContextFreeGrammar>): ContextFreeGrammar;
+	public cnf(step?: StepCallback<ContextFreeGrammar>): ContextFreeGrammar {
 		return this.bin(step).del(step).unit(step).term(step);
 	}
 	//#endregion Transformations
