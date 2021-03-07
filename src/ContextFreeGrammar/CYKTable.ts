@@ -2,11 +2,15 @@ export class CYKTable extends Map<string, Set<string>> {
 	public readonly string: string;
 
 	public constructor(string: string);
-	public constructor(string: string, entries: Iterable<(Readonly<[string, Set<string>]>)>);
+	public constructor(string: string, entries: Iterable<Readonly<[string, Set<string>]>>);
 	public constructor(original: CYKTable);
-	public constructor(a: string | CYKTable, b?: Iterable<(Readonly<[string, Set<string>]>)>) {
+	public constructor(a: string | CYKTable, b?: Iterable<Readonly<[string, Set<string>]>>) {
 		if (typeof a === "string") {
-			super(b);
+			super(
+				b == null ?
+					new Array<Readonly<[string, Set<string>]>>() :
+					[...b].map(([s, nts]) => [s, new Set<string>(nts)])
+			);
 			this.string = a;
 		}
 		else {
