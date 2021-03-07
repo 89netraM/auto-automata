@@ -8,7 +8,7 @@ interface State {
 	string: string;
 	validString: boolean;
 	cfgCNF: CFG.ContextFreeGrammar;
-	steps: Array<CFG.CYKTable>;
+	steps: Array<[[number, CFG.CYKTable], string]>;
 }
 
 enum CopyType {
@@ -36,8 +36,8 @@ export class CFGCYK extends Component<{}, State> {
 		let cfgCNF: CFG.ContextFreeGrammar = null;
 		this.state.cfg.cnf(s => cfgCNF = s);
 
-		const steps = new Array<CFG.CYKTable>();
-		this.state.cfg.cyk(this.state.string, t => steps.push(t));
+		const steps = new Array<[[number, CFG.CYKTable], string]>();
+		this.state.cfg.cyk(this.state.string, (e, desc) => steps.push([e, desc]));
 
 		this.setState({
 			cfgCNF: cfgCNF != null ? cfgCNF : null,
@@ -65,7 +65,7 @@ export class CFGCYK extends Component<{}, State> {
 			let text: string;
 			switch (type) {
 				case CopyType.LaTeX:
-					text = this.state.steps.map(t => t.formatLaTeX()).join(" \\\\[1em]\n");
+					text = this.state.steps.map(([[_height, t], _desc]) => t.formatLaTeX()).join(" \\\\[1em]\n");
 					break;
 				default:
 					throw null;
@@ -128,12 +128,11 @@ export class CFGCYK extends Component<{}, State> {
 					<section>
 						<h3>Steps</h3>
 						{
-							this.state.steps.map((t, i) =>
-								<CYKTable
-									key={i}
-									table={t}
-									maxHeight={i + 1}
-								/>
+							this.state.steps.map(([[_, t], desc], i) =>
+								<div key={i}>
+									<p>{desc}</p>
+									<CYKTable table={t}/>
+								</div>
 							)
 						}
 						<div className="action-buttons">
