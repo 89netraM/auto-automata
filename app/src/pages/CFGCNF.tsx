@@ -6,10 +6,10 @@ import TeX from "@matejmazur/react-katex";
 interface State {
 	cfg: CFG.ContextFreeGrammar;
 	steps: {
-		bin: Array<CFG.ContextFreeGrammar>;
-		del: Array<CFG.ContextFreeGrammar>;
-		unit: Array<CFG.ContextFreeGrammar>;
-		term: Array<CFG.ContextFreeGrammar>;
+		bin: Array<[CFG.ContextFreeGrammar, string]>;
+		del: Array<[CFG.ContextFreeGrammar, string]>;
+		unit: Array<[CFG.ContextFreeGrammar, string]>;
+		term: Array<[CFG.ContextFreeGrammar, string]>;
 	};
 }
 
@@ -30,22 +30,22 @@ export class CFGCNF extends Component<{}, State> {
 	}
 
 	private transform(): void {
-		const bin = new Array<CFG.ContextFreeGrammar>();
-		let del = null;
-		let unit = null
-		let term = null;
+		const bin = new Array<[CFG.ContextFreeGrammar, string]>();
+		let del: Array<[CFG.ContextFreeGrammar, string]> = null;
+		let unit: Array<[CFG.ContextFreeGrammar, string]> = null
+		let term: Array<[CFG.ContextFreeGrammar, string]> = null;
 
 		try {
-			let cfg = this.state.cfg.bin(s => bin.push(s));
+			let cfg = this.state.cfg.bin((cfg, desc) => bin.push([cfg, desc]));
 			if (cfg != null) {
-				del = new Array<CFG.ContextFreeGrammar>();
-				cfg = cfg.del(s => del.push(s));
+				del = new Array<[CFG.ContextFreeGrammar, string]>();
+				cfg = cfg.del((cfg, desc) => del.push([cfg, desc]));
 				if (cfg != null) {
-					unit = new Array<CFG.ContextFreeGrammar>();
-					cfg = cfg.unit(s => unit.push(s));
+					unit = new Array<[CFG.ContextFreeGrammar, string]>();
+					cfg = cfg.unit((cfg, desc) => unit.push([cfg, desc]));
 					if (cfg != null) {
-						term = new Array<CFG.ContextFreeGrammar>();
-						cfg.term(s => term.push(s));
+						term = new Array<[CFG.ContextFreeGrammar, string]>();
+						cfg.term((cfg, desc) => term.push([cfg, desc]));
 					}
 				}
 			}
@@ -69,10 +69,10 @@ export class CFGCNF extends Component<{}, State> {
 			switch (type) {
 				case CopyType.LaTeX:
 					text = [
-						this.state.steps.bin.map(cfg => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
-						this.state.steps.del.map(cfg => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
-						this.state.steps.unit.map(cfg => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
-						this.state.steps.term.map(cfg => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
+						this.state.steps.bin.map(([cfg, _]) => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
+						this.state.steps.del.map(([cfg, _]) => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
+						this.state.steps.unit.map(([cfg, _]) => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
+						this.state.steps.term.map(([cfg, _]) => cfg.formatLaTeX()).join(" \\\\[1em]\n"),
 					].join(" \\\\[3em]\n\n");
 					break;
 				default:
@@ -130,12 +130,14 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Bin</h4>
 								{
-									this.state.steps.bin.map((cfg, i) =>
-										<CFGTable
-											key={i}
-											cfg={cfg}
-											readonly={true}
-										/>
+									this.state.steps.bin.map(([cfg, desc], i) =>
+										<div key={i}>
+											<p>{desc}</p>
+											<CFGTable
+												cfg={cfg}
+												readonly={true}
+											/>
+										</div>
 									)
 								}
 								<br/>
@@ -147,12 +149,14 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Del</h4>
 								{
-									this.state.steps.del.map((cfg, i) =>
-										<CFGTable
-											key={i}
-											cfg={cfg}
-											readonly={true}
-										/>
+									this.state.steps.del.map(([cfg, desc], i) =>
+										<div key={i}>
+											<p>{desc}</p>
+											<CFGTable
+												cfg={cfg}
+												readonly={true}
+											/>
+										</div>
 									)
 								}
 								<br/>
@@ -164,12 +168,14 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Unit</h4>
 								{
-									this.state.steps.unit.map((cfg, i) =>
-										<CFGTable
-											key={i}
-											cfg={cfg}
-											readonly={true}
-										/>
+									this.state.steps.unit.map(([cfg, desc], i) =>
+										<div key={i}>
+											<p>{desc}</p>
+											<CFGTable
+												cfg={cfg}
+												readonly={true}
+											/>
+										</div>
 									)
 								}
 								<br/>
@@ -181,12 +187,14 @@ export class CFGCNF extends Component<{}, State> {
 							<>
 								<h4>Term</h4>
 								{
-									this.state.steps.term.map((cfg, i) =>
-										<CFGTable
-											key={i}
-											cfg={cfg}
-											readonly={true}
-										/>
+									this.state.steps.term.map(([cfg, desc], i) =>
+										<div key={i}>
+											<p>{desc}</p>
+											<CFGTable
+												cfg={cfg}
+												readonly={true}
+											/>
+										</div>
 									)
 								}
 								<br/>
