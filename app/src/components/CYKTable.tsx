@@ -45,6 +45,7 @@ export class CYKTable extends Component<Properties, {}> {
 			<div className="cyk-table">
 				<TeX
 					math={this.props.table.formatLaTeX(this.props.maxHeight)}
+					settings={{ strict: false }}
 					block={true}
 				/>
 				<div className="action-buttons">
