@@ -218,11 +218,11 @@ export class ContextFreeGrammar {
 	}
 
 	public cyk(string: string): CYKTable;
-	public cyk(string: string, step: (table: CYKTable) => void): CYKTable;
-	public cyk(string: string, step?: (table: CYKTable) => void): CYKTable {
+	public cyk(string: string, step: StepCallback<[number, CYKTable]>): CYKTable;
+	public cyk(string: string, step?: StepCallback<[number, CYKTable]>): CYKTable {
 		const cfg = this.cnf();
 		const table = new CYKTable(string);
-		const callStep = () => step?.(new CYKTable(table));
+		const callStep = (height: number, desc: string) => step?.([height, new CYKTable(table)], desc);
 
 		const getSequencesFor = (part: string): Array<Array<string>> => {
 			const sequences = new Array<Array<string>>();
@@ -238,44 +238,50 @@ export class ContextFreeGrammar {
 
 		for (const i of string) {
 			if (!table.has(i)) {
-				table.set(
-					i,
-					new Set<string>(
-						[...cfg.productions]
-							.filter(([_, p]) => p.some(s => s.length === 1 && s[0].kind === TokenKind.Terminal && s[0].identifier === i))
-							.map(([nt, _]) => nt)
-					)
+				const producers = new Set<string>(
+					[...cfg.productions]
+						.filter(([_, p]) => p.some(s => s.length === 1 && s[0].kind === TokenKind.Terminal && s[0].identifier === i))
+						.map(([nt, _]) => nt)
 				);
+				table.set(i, producers);
+				if (producers.size > 0) {
+					callStep(1, `Add non-terminals that directly can produce the string "${i}".`);
+				}
+				else {
+					callStep(1, `No non-terminals can directly produce the string "${i}".`);
+				}
 			}
 		}
-		callStep();
 
 		for (let l = 2; l <= string.length; l++) {
 			for (let i = 0; i <= string.length - l; i++) {
 				const part = string.substr(i, l);
 				if (!table.has(part)) {
 					const seqs = getSequencesFor(part);
-					table.set(
-						part,
-						new Set<string>(
-							[...cfg.productions]
-								.filter(([_, p]) =>
-									p.some(s =>
-										seqs.some(seq =>
-											seq.every((t, i) =>
-												i < s.length &&
-												s[i].kind === TokenKind.NonTerminal &&
-												s[i].identifier === t
-											)
+					const producers = new Set<string>(
+						[...cfg.productions]
+							.filter(([_, p]) =>
+								p.some(s =>
+									seqs.some(seq =>
+										seq.every((t, i) =>
+											i < s.length &&
+											s[i].kind === TokenKind.NonTerminal &&
+											s[i].identifier === t
 										)
 									)
 								)
-								.map(([nt, _]) => nt)
-						)
+							)
+							.map(([nt, _]) => nt)
 					);
+					table.set(part, producers);
+					if (producers.size > 0) {
+						callStep(l, `Add productions that can produce the string "${part}".`);
+					}
+					else {
+						callStep(l, `No productions can produce the string "${part}".`);
+					}
 				}
 			}
-			callStep();
 		}
 
 		return table;
