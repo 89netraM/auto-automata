@@ -516,40 +516,41 @@ export class ContextFreeGrammar {
 	}
 
 	public term(): ContextFreeGrammar;
-	public term(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
-	public term(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
+	public term(step: StepCallback<ContextFreeGrammar>): ContextFreeGrammar;
+	public term(step?: StepCallback<ContextFreeGrammar>): ContextFreeGrammar {
 		const productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
 
 		const terminalProductions = new Map<string, string>([...productions]
 			.filter(([_, p]) => p.length === 1 && p[0].length === 1 && p[0][0].kind === TokenKind.Terminal)
-			.map(([nt, p]) => [p[0][0].identifier, nt])
-		);
+			.map(([nt, p]) => [p[0][0].identifier, nt]));
 
-		for (const [_, production] of [...productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
-			let changeHappened = false;
+		for (const [nonTerminal, production] of [...productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
 			for (const sequence of production) {
 				if (sequence.length >= 2) {
 					for (let i = 0; i < sequence.length; i++) {
 						if (sequence[i].kind === TokenKind.Terminal) {
-							let replacement = terminalProductions.get(sequence[i].identifier);
+							const terminal = sequence[i].identifier;
+							let isNew = false;
+							let replacement = terminalProductions.get(terminal);
 							if (replacement == null) {
-								replacement = countUpLetterSymbol("T", s => !productions.has(s));
-								terminalProductions.set(sequence[i].identifier, replacement);
-								productions.set(replacement, new Array<Array<Token>>(new Array<Token>(Token.terminal(sequence[i].identifier))));
+								replacement = countUpLetterSymbol(nonTerminal, s => !productions.has(s));
+								terminalProductions.set(terminal, replacement);
+								productions.set(replacement, new Array<Array<Token>>(new Array<Token>(Token.terminal(terminal))));
+								isNew = true;
 							}
 							sequence.splice(i, 1, Token.nonTerminal(replacement));
-							changeHappened = true;
+							step?.(
+								new ContextFreeGrammar(
+									productions.keys(),
+									this.terminals,
+									productions,
+									this.start,
+								),
+								`Replaced a terminal "${terminal}" in production ${nonTerminal} with the ${isNew ? "new " : ""}non-terminal ${replacement}.`
+							);
 						}
 					}
 				}
-			}
-			if (changeHappened) {
-				step?.(new ContextFreeGrammar(
-					productions.keys(),
-					this.terminals,
-					productions,
-					this.start,
-				));
 			}
 		}
 
