@@ -26,7 +26,9 @@ export class ContextFreeGrammar {
 			));
 		};
 		if (productions == null || [...productions].every(([nt, p]) => this.nonTerminals.has(nt) && checkProduction(p))) {
-			this.productions = productions != null ? new Map<string, Production>(productions) : new Map<string, Production>();
+			this.productions = productions != null ?
+				new Map<string, Production>([...productions].map(([nt, p]) => [nt, p.map(s => [...s])])) :
+				new Map<string, Production>();
 		}
 		else {
 			throw new Error("Error in productions.");
