@@ -40,7 +40,7 @@ export class CFGCYK extends Component<{}, State> {
 		this.state.cfg.cyk(this.state.string, t => steps.push(t));
 
 		this.setState({
-			cfgCNF: cfgCNF != null && this.state.cfg.formatUTF8() !== cfgCNF.formatUTF8() ? cfgCNF : null,
+			cfgCNF: cfgCNF != null ? cfgCNF : null,
 			steps,
 		});
 	}
