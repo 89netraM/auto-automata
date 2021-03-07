@@ -439,14 +439,14 @@ export class ContextFreeGrammar {
 	}
 
 	public unit(): ContextFreeGrammar;
-	public unit(step: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar;
-	public unit(step?: (cfg: ContextFreeGrammar) => void): ContextFreeGrammar {
-		const productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
+	public unit(step: StepCallback<ContextFreeGrammar>): ContextFreeGrammar;
+	public unit(step?: StepCallback<ContextFreeGrammar>): ContextFreeGrammar {
+		let productions = new Map<string, Array<Array<Token>>>([...this.productions].map(([nt, p]) => [nt, p.map(s => [...s])]));
 
-		const isCircular = (target: string, production: Production, seen: ReadonlySet<string>): boolean => {
+		const isCircular = (target: string, production: Production, seen: ReadonlySet<string> = new Set<string>()): boolean => {
 			for (const sequence of production) {
 				if (sequence.length === 1 && sequence[0].kind === TokenKind.NonTerminal) {
-					if (sequence[0].identifier === target) {
+					if (sequence[0].identifier === target || seen.has(sequence[0].identifier)) {
 						return true;
 					}
 					else {
@@ -467,42 +467,43 @@ export class ContextFreeGrammar {
 		do {
 			changeHappened = false;
 
-			const changes = new Array<[string, Array<[number, Array<Array<Token>>]>]>();
-			for (const [nonTerminal, production] of productions) {
-				const productionChanges = new Array<[number, Array<Array<Token>>]>();
+			for (const [nonTerminal, production] of [...productions].sort(([a, _a], [b, _b]) => sortBySymbolButFirst(a, b, this.start))) {
 				for (let i = 0; i < production.length; i++) {
 					const sequence = production[i];
 					if (sequence.length === 1 &&
 						sequence[0].kind === TokenKind.NonTerminal
 					) {
 						if (nonTerminal === sequence[0].identifier) {
-							productionChanges.push([i, new Array<Array<Token>>()]);
+							productions.get(nonTerminal).splice(i, 1);
+							i += -1;
 							changeHappened = true;
+							step?.(
+								new ContextFreeGrammar(
+									productions.keys(),
+									this.terminals,
+									productions,
+									this.start,
+								),
+								`Removed the "self-reference" in ${nonTerminal}.`
+							);
 						}
-						else if (!isCircular(sequence[0].identifier, productions.get(sequence[0].identifier), new Set<string>())) {
-							productionChanges.push([i, productions.get(sequence[0].identifier).map(s => [...s])]);
+						else if (!isCircular(sequence[0].identifier, productions.get(sequence[0].identifier))) {
+							const newAlternatives = productions.get(sequence[0].identifier).map(s => [...s]);
+							productions.get(nonTerminal).splice(i, 1, ...newAlternatives);
+							i += newAlternatives.length - 1;
 							changeHappened = true;
+							step?.(
+								new ContextFreeGrammar(
+									productions.keys(),
+									this.terminals,
+									productions,
+									this.start,
+								),
+								`"Inlined" the production for ${sequence[0].identifier} in ${nonTerminal}.`
+							);
 						}
 					}
 				}
-				changes.push([nonTerminal, productionChanges]);
-			}
-			for (const [nonTerminal, productionChanges] of changes) {
-				const production = productions.get(nonTerminal);
-				let offset = 0;
-				for (const [i, alts] of productionChanges) {
-					production.splice(offset + i, 1, ...alts);
-					offset += alts.length - 1;
-				}
-			}
-
-			if (changeHappened) {
-				step?.(new ContextFreeGrammar(
-					this.nonTerminals,
-					this.terminals,
-					productions,
-					this.start,
-				));
 			}
 		} while (changeHappened);
 
