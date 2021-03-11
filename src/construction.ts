@@ -18,7 +18,15 @@ const SubState = {
 			accepting: [...states].some(s => a.accepting.has(s)),
 		}
 	},
-	name: (states: Iterable<string>): string => [...states].sort().join(""),
+	name: (states: Iterable<string>): string => {
+		const arr = new Array<string>(...states);
+		if (arr.every(s => s === Graph.Empty)) {
+			return Graph.Empty;
+		}
+		else {
+			return arr.filter(s => s !== Graph.Empty).sort().join("");
+		}
+	},
 };
 
 /**
