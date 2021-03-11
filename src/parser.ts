@@ -61,6 +61,17 @@ export function parseTable(text: string): Automata | null {
 		}
 	}
 
+	if (Graph.Empty in states) {
+		for (const stateName in states) {
+			for (const symbol in states[stateName]) {
+				const set = states[stateName][symbol];
+				if (set.size === 0) {
+					set.add(Graph.Empty);
+				}
+			}
+		}
+	}
+
 	const alphabet = new Set(alphabetList);
 	alphabet.delete(Graph.Epsilon);
 	return {
