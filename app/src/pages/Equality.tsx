@@ -6,7 +6,8 @@ import { TableAutomata } from "../components/TableAutomata";
 interface State {
 	automataA: Automata;
 	automataB: Automata;
-	stateEquivalence: StateEquivalenceTableType,
+	validCombination: boolean;
+	steps: Array<[string, StateEquivalenceTableType]>;
 	equals: boolean;
 }
 
@@ -27,9 +28,12 @@ export class Equality extends Component<{}, State> {
 				states: {},
 				alphabet: new Set<string>(),
 			},
-			stateEquivalence: null,
+			validCombination: true,
+			steps: null,
 			equals: false,
 		};
+
+		this.compare = this.compare.bind(this);
 	}
 
 	private sameAlphabet(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
@@ -47,36 +51,29 @@ export class Equality extends Component<{}, State> {
 	}
 
 	private updateAutomataA(automataA: Automata): void {
-		if (Automata.validate(automataA) && Automata.validate(this.state.automataB)) {
-			const stateEquivalence = this.sameAlphabet(automataA.alphabet, this.state.automataB.alphabet) ?
-				Automata.stateEquivalenceTable(automataA, this.state.automataB) : null;
-			this.setState({
-				automataA,
-				stateEquivalence,
-				equals: stateEquivalence?.[automataA.starting][this.state.automataB.starting] ?? false,
-			});
-		}
-		else {
-			this.setState({
-				automataA,
-			});
-		}
+		this.setState({
+			automataA,
+			validCombination: Automata.validate(automataA) &&
+				Automata.validate(this.state.automataB) &&
+				this.sameAlphabet(automataA.alphabet, this.state.automataB.alphabet),
+		});
 	}
 	private updateAutomataB(automataB: Automata): void {
-		if (Automata.validate(this.state.automataA) && Automata.validate(automataB)) {
-			const stateEquivalence = this.sameAlphabet(this.state.automataA.alphabet, automataB.alphabet) ?
-				Automata.stateEquivalenceTable(this.state.automataA, automataB) : null;
-			this.setState({
-				automataB,
-				stateEquivalence,
-				equals: stateEquivalence?.[this.state.automataA.starting][automataB.starting] ?? false,
-			});
-		}
-		else {
-			this.setState({
-				automataB,
-			});
-		}
+		this.setState({
+			automataB,
+			validCombination: Automata.validate(this.state.automataA) &&
+				Automata.validate(automataB) &&
+				this.sameAlphabet(this.state.automataA.alphabet, automataB.alphabet),
+		});
+	}
+
+	private compare(): void {
+		const steps = new Array<[string, StateEquivalenceTableType]>();
+		const stateEquivalence = Automata.stateEquivalenceTable(this.state.automataA, this.state.automataB, (t, desc) => steps.push([desc, t]));
+		this.setState({
+			steps,
+			equals: stateEquivalence?.[this.state.automataA.starting][this.state.automataB.starting] ?? false,
+		});
 	}
 
 	public render(): ReactNode {
@@ -101,13 +98,26 @@ export class Equality extends Component<{}, State> {
 							/>
 						</div>
 					</div>
+					<br/>
+					<button
+						className="primary"
+						onClick={this.compare}
+						disabled={!this.state.validCombination}
+					>Compare</button>
 				</section>
 				{
-					this.state.stateEquivalence == null ? null :
+					this.state.steps == null ? null :
 					<section>
 						<h2>Equals: {this.state.equals ? "✔️" : "❌"}</h2>
 						<p>A state equivalence table is built from the two DFAs:</p>
-						<StateEquivalenceTable table={this.state.stateEquivalence}/>
+						{
+							this.state.steps.map(([desc, t], i) =>
+								<div key={i}>
+									<p>{desc}</p>
+									<StateEquivalenceTable table={t}/>
+								</div>
+							)
+						}
 						{
 							this.state.equals ?
 								<p>
