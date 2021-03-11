@@ -1,33 +1,50 @@
 import { Automata } from "./Automata";
+import { StepCallback } from "./Steps";
 
 export interface StateEquivalenceTable {
 	[stateName: string]: { [stateName: string]: boolean };
 }
 
 export function stateEquivalenceTable(a: Automata): StateEquivalenceTable;
+export function stateEquivalenceTable(a: Automata, step: StepCallback<StateEquivalenceTable>): StateEquivalenceTable;
 export function stateEquivalenceTable(a: Automata, b: Automata): StateEquivalenceTable;
-export function stateEquivalenceTable(a: Automata, b?: Automata): StateEquivalenceTable {
+export function stateEquivalenceTable(a: Automata, b: Automata, step: StepCallback<StateEquivalenceTable>): StateEquivalenceTable;
+export function stateEquivalenceTable(a: Automata, b?: Automata | StepCallback<StateEquivalenceTable>, c?: StepCallback<StateEquivalenceTable>): StateEquivalenceTable {
 	const table: StateEquivalenceTable = {};
-
-	if (b == null) {
-		for (const fromState in a.states) {
-			table[fromState] = {};
-			for (const toState in a.states) {
-				table[fromState][toState] = fromState === toState ||
-					a.accepting.has(fromState) === a.accepting.has(toState);
+	const cloneTable = (): StateEquivalenceTable => {
+		const clone: StateEquivalenceTable = {};
+		for (const fromName in table) {
+			clone[fromName] = {};
+			for (const toName in table[fromName]) {
+				clone[fromName][toName] = table[fromName][toName];
 			}
 		}
-	}
-	else {
-		for (const aState in a.states) {
-			table[aState] = {};
-			for (const bState in b.states) {
-				table[aState][bState] = a.accepting.has(aState) === b.accepting.has(bState);
-			}
+		return clone;
+	};
+
+	const step = b instanceof Function ? b : c;
+	const isOneAutomata = b == null || b instanceof Function;
+	const bStates = isOneAutomata ? a.states : (b as Automata).states;
+	const bAccepting = isOneAutomata ? a.accepting : (b as Automata).accepting;
+
+	for (const aState in a.states) {
+		table[aState] = {};
+		for (const bState in bStates) {
+			table[aState][bState] = true;
 		}
 	}
 
-	const bStates = b?.states ?? a.states;
+	step?.(cloneTable(), "Begin with all states as indistinguishable.");
+
+	for (const aState in a.states) {
+		table[aState] = {};
+		for (const bState in bStates) {
+			table[aState][bState] = a.accepting.has(aState) === bAccepting.has(bState);
+		}
+	}
+
+	step?.(cloneTable(), "All pairs of states where not both are either accepting or unaccepting, are distinguishable.");
+
 	let changeHappened: boolean;
 	do {
 		changeHappened = false;
@@ -38,8 +55,15 @@ export function stateEquivalenceTable(a: Automata, b?: Automata): StateEquivalen
 					symbolLoop: for (const symbol of a.alphabet) {
 						for (const aTarget of a.states[aState][symbol]) {
 							for (const bTarget of bStates[bState][symbol]) {
-								if (!table[aTarget][bTarget]) {
+								if (!table[aTarget][bTarget] && table[aState][bState]) {
 									table[aState][bState] = false;
+									if (isOneAutomata) {
+										table[bState][aState] = false;
+									}
+									step?.(
+										cloneTable(),
+										`${aState} and ${bState} are distinguishable because their "${symbol}"-transitions reach two distinguishable states, ${aTarget} and ${bTarget} respectively.`
+									);
 									changeHappened = true;
 									break symbolLoop;
 								}
