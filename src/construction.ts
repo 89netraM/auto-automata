@@ -79,21 +79,17 @@ export function constructSubset(a: Readonly<Automata>, step?: (a: Automata) => v
 				}
 			}
 			else {
-				states[state.name][symbol] = new Set();
+				states[state.name][symbol] = new Set([Graph.Empty]);
+				if (!(Graph.Empty in states)) {
+					states[Graph.Empty] = {};
+					for (const symbol of a.alphabet) {
+						states[Graph.Empty][symbol] = new Set([Graph.Empty]);
+					}
+				}
 			}
 		}
 		if (step != null) {
 			step(makeAutomata());
-		}
-	}
-
-	if (Object.values(states).some(t =>
-			![...a.alphabet].every(l => l in t) ||
-			Object.values(t).some(s => s.size === 0))
-		) {
-		states[Graph.Empty] = {};
-		for (const symbol of a.alphabet) {
-			states[Graph.Empty][symbol] = new Set([Graph.Empty]);
 		}
 	}
 
@@ -165,6 +161,9 @@ export function constructProduct(a: Automata, b: Automata, step?: (a: Automata) 
 		return makeAutomata();
 	}
 	else {
+		console.log(Graph.isDFA(a.states), Graph.isDFA(b.states),
+		[...a.alphabet].every(l => b.alphabet.has(l)),
+		[...b.alphabet].every(l => a.alphabet.has(l)));
 		return null;
 	}
 }
