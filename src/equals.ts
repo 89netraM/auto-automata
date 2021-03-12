@@ -4,6 +4,24 @@ import { StepCallback } from "./Steps";
 export interface StateEquivalenceTable {
 	[stateName: string]: { [stateName: string]: boolean };
 }
+export const StateEquivalenceTable = {
+	formatLaTeX: function (table: StateEquivalenceTable): string {
+		const left = Object.keys(table);
+		const top = Object.keys(table[left[0]]);
+		return "\\begin{array}{r|}\n" +
+			`\t& ${top.join(" & ")} \\\\\n` +
+			"\t\\hline\n" +
+			left.map((l, r) => `\t${l} &${" &".repeat(r)} ${[
+						"⋅",
+						...top.slice(r + 1)
+							.map(t => table[l][t] ? "✓" : "🞩")
+					].join(" & ")
+				}`)
+				.join(" \\\\\n") +
+			"\n" +
+			"\\end{array}";
+	},
+};
 
 export function stateEquivalenceTable(a: Automata): StateEquivalenceTable;
 export function stateEquivalenceTable(a: Automata, step: StepCallback<StateEquivalenceTable>): StateEquivalenceTable;
