@@ -2,6 +2,7 @@ import React, { Component, ReactNode, MouseEvent } from "react";
 import {
 	AutomataMinimisation,
 	AutomataProduct,
+	AutomataStateEquivalence,
 	AutomataSum,
 	AutomataToRegularExpression,
 	CFGBin,
@@ -23,6 +24,7 @@ const pages = {
 	"Readme": <Readme />,
 	"Test Automata": <TestAutomata />,
 	"Automata Equality": <Equality />,
+	"Automata State Equivalence": <AutomataStateEquivalence />,
 	"Automata Minimisation": <AutomataMinimisation />,
 	"Subset Construction": <SubsetConstruction />,
 	"Product Construction": <AutomataProduct />,
