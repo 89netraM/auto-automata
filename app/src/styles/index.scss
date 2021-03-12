@@ -16,3 +16,13 @@ main a {
 		text-decoration: underline;
 	}
 }
+
+nav {
+	overflow-y: auto;
+
+	ul li a {
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+	}
+}
