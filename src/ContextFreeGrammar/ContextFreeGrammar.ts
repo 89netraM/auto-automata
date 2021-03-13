@@ -42,48 +42,63 @@ export class ContextFreeGrammar {
 		}
 	}
 
+	//#region Computations
 	public parse(string: string): ParseTree | null {
-		if (this.start != null) {
-			const queue = new Array<[Array<Token>, Array<Token>, string]>([new Array<Token>(), [Token.nonTerminal(this.start)], string]);
-			while (queue.length > 0) {
-				const [tree, [token, ...rest], string] = queue.shift();
-				if (token.kind === TokenKind.NonTerminal) {
-					for (const sequence of this.productions.get(token.identifier)) {
-						queue.push([
-							[...tree, token],
-							[...sequence, ...rest],
-							string
-						]);
-					}
+		if (this.start == null) {
+			return null;
+		}
+		if (string.length > 0) {
+			const cyk = this.cyk(string);
+			if (cyk == null || !cyk.has(string) || !cyk.get(string).has(this.start)) {
+				return null;
+			}
+		}
+		else {
+			if (!this.nullableNonTerminals().some(t => t === this.start)) {
+				return null;
+			}
+		}
+
+		const queue = new Array<[Array<Token>, Array<Token>, string]>([new Array<Token>(), [Token.nonTerminal(this.start)], string]);
+		while (queue.length > 0) {
+			const [tree, [token, ...rest], string] = queue.shift();
+			if (token.kind === TokenKind.NonTerminal) {
+				for (const sequence of this.productions.get(token.identifier)) {
+					queue.push([
+						[...tree, token],
+						[...sequence, ...rest],
+						string
+					]);
 				}
-				else if (token.kind === TokenKind.Terminal) {
-					if (string.startsWith(token.identifier)) {
-						if (string.length === token.identifier.length && rest.length === 0) {
-							return this.constructTree([...tree, token]);
-						}
-						else if (rest.length > 0) {
-							queue.push([
-								[...tree, token],
-								rest,
-								string.substring(token.identifier.length)
-							]);
-						}
-					}
-				}
-				else if (token.kind === TokenKind.Empty) {
-					if (string.length === 0 && rest.length === 0) {
+			}
+			else if (token.kind === TokenKind.Terminal) {
+				if (string.startsWith(token.identifier)) {
+					if (string.length === token.identifier.length && rest.length === 0) {
 						return this.constructTree([...tree, token]);
 					}
 					else if (rest.length > 0) {
 						queue.push([
 							[...tree, token],
 							rest,
-							string
+							string.substring(token.identifier.length)
 						]);
 					}
 				}
 			}
+			else if (token.kind === TokenKind.Empty) {
+				if (string.length === 0 && rest.length === 0) {
+					return this.constructTree([...tree, token]);
+				}
+				else if (rest.length > 0) {
+					queue.push([
+						[...tree, token],
+						rest,
+						string
+					]);
+				}
+			}
 		}
+
 		return null;
 	}
 	private constructTree(tokens: ReadonlyArray<Token>): ParseTree;
@@ -122,7 +137,6 @@ export class ContextFreeGrammar {
 		throw new Error("Failed to construct the parse tree.");
 	}
 
-	//#region Computations
 	public generatingSymbols(): Array<Token>;
 	public generatingSymbols(step: (symbols: Array<Token>) => void): Array<Token>;
 	public generatingSymbols(step?: (symbols: Array<Token>) => void): Array<Token> {
