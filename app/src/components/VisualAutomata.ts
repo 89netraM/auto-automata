@@ -15,6 +15,10 @@ export class VisualAutomata extends GraphBase<Properties> {
 		super(props);
 	}
 
+	public shouldComponentUpdate(nextProps: Properties): boolean {
+		return this.props.automata !== nextProps.automata;
+	}
+
 	protected buildGraph(): graphlib.Graph<{}> {
 		const automata = this.props.automata;
 

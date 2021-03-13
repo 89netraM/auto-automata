@@ -14,6 +14,10 @@ export class ParseTree extends GraphBase<Properties> {
 		super(props);
 	}
 
+	public shouldComponentUpdate(nextProps: Properties): boolean {
+		return this.props.tree !== nextProps.tree;
+	}
+
 	protected buildGraph(): graphlib.Graph<{}> {
 		const g = new graphlib.Graph().setGraph({});
 		g.graph().rankdir = "UD";
