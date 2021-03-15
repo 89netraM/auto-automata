@@ -13,6 +13,7 @@ import {
 	CFGTerm,
 	CFGUnit,
 	Equality,
+	PastingFormats,
 	Readme,
 	RegularExpressionToAutomata,
 	SubsetConstruction,
@@ -22,6 +23,7 @@ import {
 
 const pages = {
 	"Readme": <Readme />,
+	"Pasting Formats": <PastingFormats />,
 	"Test Automata": <TestAutomata />,
 	"Automata Equality": <Equality />,
 	"Automata State Equivalence": <AutomataStateEquivalence />,

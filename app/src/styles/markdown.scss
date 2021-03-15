@@ -1,0 +1,61 @@
+@import "@89netram/snygg/src/vars";
+
+$codeBackground: #0f0f0f;
+
+section {
+	> h1:first-child, h1, h2, h3, h4, h5, h6 {
+		padding-top: calc(#{$headerSize} + #{$distance});
+		margin-top: calc(#{-$headerSize} + #{-$distance});
+	}
+	h1, h2 {
+		padding-bottom: 0.25em;
+		margin-bottom: 0.5em;
+		margin-left: -$distance / 2;
+		margin-right: -$distance / 2;
+		padding-left: $distance / 2;
+		padding-right: $distance / 2;
+		border-bottom: 1px solid var(--border);
+	}
+
+	p {
+		line-height: 1.5;
+		margin-bottom: 1em;
+	}
+
+	code {
+		padding: 0.25em 0.5em;
+		border-radius: 0.2em;
+		font-size: 85%;
+		background-color: $codeBackground;
+	}
+	pre {
+		padding: ($distance / 2) $distance;
+		border-radius: $rounding;
+		line-height: 1.5;
+		background-color: $codeBackground;
+
+		code {
+			padding: unset;
+			font-size: unset;
+		}
+	}
+
+	&.readme {
+		h1 {
+			font-size: 2rem;
+		}
+
+		ul {
+			padding: 0px;
+	
+			li {
+				padding-left: $distance * 0.5;
+				list-style: none;
+	
+				ul li {
+					padding-left: $distance * 1.5;
+				}
+			}
+		}
+	}
+}

@@ -16,3 +16,4 @@ export * from "./CFGTerm";
 export * from "./CFGCNF";
 export * from "./CFGCYK";
 export * from "./AutomataStateEquivalence";
+export * from "./PastingFormats";

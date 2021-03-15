@@ -78,8 +78,8 @@ It can also read a format specific to the related course, it works like this.
 
 Each production of the grammar is written on one line starting with the
 non-terminal "name" of the production. Followed by the UTF-8 character `→`.
-After that all the alternative of the production is listed, separated by a bar
-`|`.
+After that all the alternative of the production is listed, separated by a
+bar `|`.
 
 **Note**: Non-terminals must be single uppercase letter (A-Z), all other
 characters are considered to be terminals with one exception. The UTF-8
