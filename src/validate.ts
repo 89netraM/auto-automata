@@ -11,20 +11,26 @@ export interface ValidatorError {
  * alphabet. Returns `true` or a string describing the error.
  * @param a The automata.
  */
-export function automataValidate(a: Readonly<Automata>): boolean | Array<ValidatorError> {
+export function automataValidate(a: Readonly<Automata>): true | Array<ValidatorError> {
 	const errors = new Array<ValidatorError>();
 
-	if (!(a.starting in a.states)) {
+	if (a.starting == null) {
 		errors.push({
 			path: ["start"],
-			error: `no state named "${a.starting}" exists`
+			error: `no starting state selected`
+		});
+	}
+	else if (!(a.starting in a.states)) {
+		errors.push({
+			path: ["start"],
+			error: `the starting state "${a.starting}" does not exists`
 		});
 	}
 	for (const targetStateName of a.accepting) {
 		if (!(targetStateName in a.states)) {
 			errors.push({
 				path: ["accepting"],
-				error: `no state named "${targetStateName}" exists`
+				error: `the accepting state "${targetStateName}" does not exists`
 			});
 		}
 	}
@@ -43,7 +49,7 @@ export function automataValidate(a: Readonly<Automata>): boolean | Array<Validat
  * @param g The graph.
  * @param a The alphabet.
  */
-export function graphValidate(g: Readonly<Graph>, a: ReadonlySet<string>): boolean | Array<ValidatorError> {
+export function graphValidate(g: Readonly<Graph>, a: ReadonlySet<string>): true | Array<ValidatorError> {
 	const errors = new Array<ValidatorError>();
 
 	for (const stateName in g) {
