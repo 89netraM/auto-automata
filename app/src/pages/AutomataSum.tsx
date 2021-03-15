@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { Automata } from "auto-automata";
+import { Automata, Graph } from "auto-automata";
 import { AutomataSteps } from "../components/AutomataSteps";
 import { TableAutomata } from "../components/TableAutomata";
 
@@ -41,6 +41,16 @@ export class AutomataSum extends Component<{}, State> {
 	}
 
 	public render(): ReactNode {
+		const validationA = Automata.validate(this.state.automataA);
+		const errorsA = validationA === true ? new Array<string>() : [...new Set<string>(validationA.map(e => e.error))];
+		if (!Graph.isDFA(this.state.automataA.states)) {
+			errorsA.unshift("automata is not a DFA");
+		}
+		const validationB = Automata.validate(this.state.automataB);
+		const errorsB = validationB === true ? new Array<string>() : [...new Set<string>(validationB.map(e => e.error))];
+		if (!Graph.isDFA(this.state.automataB.states)) {
+			errorsB.unshift("automata is not a DFA");
+		}
 		return (
 			<>
 				<section>
@@ -53,6 +63,16 @@ export class AutomataSum extends Component<{}, State> {
 								automata={this.state.automataA}
 								onChange={automataA => this.setState({ automataA })}
 							/>
+							{
+								errorsA.length === 0 ? null :
+								<ul>
+									{errorsA.map((e, i) =>
+										<li key={i}>
+											{e[0].toUpperCase() + e.substring(1)}.
+										</li>
+									)}
+								</ul>
+							}
 						</div>
 						<div>
 							<p>DFA B</p>
@@ -60,11 +80,23 @@ export class AutomataSum extends Component<{}, State> {
 								automata={this.state.automataB}
 								onChange={automataB => this.setState({ automataB })}
 							/>
+							{
+								errorsB.length === 0 ? null :
+								<ul>
+									{errorsB.map((e, i) =>
+										<li key={i}>
+											{e[0].toUpperCase() + e.substring(1)}.
+										</li>
+									)}
+								</ul>
+							}
 						</div>
 					</div>
+					<br/>
 					<button
+						className="primary"
 						onClick={this.constructSum.bind(this)}
-						disabled={Automata.validate(this.state.automataA) !== true || Automata.validate(this.state.automataB) !== true}
+						disabled={errorsA.length > 0 || errorsB.length > 0}
 					>
 						Construct Sum
 					</button>

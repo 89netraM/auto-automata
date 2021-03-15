@@ -16,7 +16,8 @@ export class VisualAutomata extends GraphBase<Properties> {
 	}
 
 	public shouldComponentUpdate(nextProps: Properties): boolean {
-		return this.props.automata !== nextProps.automata;
+		return this.props.automata !== nextProps.automata &&
+			Automata.validate(nextProps.automata) === true;
 	}
 
 	protected buildGraph(): graphlib.Graph<{}> {

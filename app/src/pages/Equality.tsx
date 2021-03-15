@@ -1,12 +1,11 @@
 import React, { Component, ReactNode } from "react";
-import { Automata, StateEquivalenceTable as StateEquivalenceTableType } from "auto-automata";
+import { Automata, Graph, StateEquivalenceTable as StateEquivalenceTableType } from "auto-automata";
 import { StateEquivalenceTable } from "../components/StateEquivalenceTable";
 import { TableAutomata } from "../components/TableAutomata";
 
 interface State {
 	automataA: Automata;
 	automataB: Automata;
-	validCombination: boolean;
 	steps: Array<[string, StateEquivalenceTableType]>;
 	equals: boolean;
 }
@@ -28,7 +27,6 @@ export class Equality extends Component<{}, State> {
 				states: {},
 				alphabet: new Set<string>(),
 			},
-			validCombination: true,
 			steps: null,
 			equals: false,
 		};
@@ -53,17 +51,11 @@ export class Equality extends Component<{}, State> {
 	private updateAutomataA(automataA: Automata): void {
 		this.setState({
 			automataA,
-			validCombination: Automata.validate(automataA) &&
-				Automata.validate(this.state.automataB) &&
-				this.sameAlphabet(automataA.alphabet, this.state.automataB.alphabet),
 		});
 	}
 	private updateAutomataB(automataB: Automata): void {
 		this.setState({
 			automataB,
-			validCombination: Automata.validate(this.state.automataA) &&
-				Automata.validate(automataB) &&
-				this.sameAlphabet(this.state.automataA.alphabet, automataB.alphabet),
 		});
 	}
 
@@ -77,6 +69,17 @@ export class Equality extends Component<{}, State> {
 	}
 
 	public render(): ReactNode {
+		const isSameAlphabet = this.sameAlphabet(this.state.automataA.alphabet, this.state.automataB.alphabet);
+		const validationA = Automata.validate(this.state.automataA);
+		const errorsA = validationA === true ? new Array<string>() : [...new Set<string>(validationA.map(e => e.error))];
+		if (!Graph.isDFA(this.state.automataA.states)) {
+			errorsA.unshift("automata is not a DFA");
+		}
+		const validationB = Automata.validate(this.state.automataB);
+		const errorsB = validationB === true ? new Array<string>() : [...new Set<string>(validationB.map(e => e.error))];
+		if (!Graph.isDFA(this.state.automataB.states)) {
+			errorsB.unshift("automata is not a DFA");
+		}
 		return (
 			<>
 				<section>
@@ -89,6 +92,16 @@ export class Equality extends Component<{}, State> {
 								automata={this.state.automataA}
 								onChange={this.updateAutomataA.bind(this)}
 							/>
+							{
+								errorsA.length === 0 ? null :
+								<ul>
+									{errorsA.map((e, i) =>
+										<li key={i}>
+											{e[0].toUpperCase() + e.substring(1)}.
+										</li>
+									)}
+								</ul>
+							}
 						</div>
 						<div>
 							<p>DFA B</p>
@@ -96,14 +109,30 @@ export class Equality extends Component<{}, State> {
 								automata={this.state.automataB}
 								onChange={this.updateAutomataB.bind(this)}
 							/>
+							{
+								errorsB.length === 0 ? null :
+								<ul>
+									{errorsB.map((e, i) =>
+										<li key={i}>
+											{e[0].toUpperCase() + e.substring(1)}.
+										</li>
+									)}
+								</ul>
+							}
 						</div>
 					</div>
 					<br/>
 					<button
 						className="primary"
 						onClick={this.compare}
-						disabled={!this.state.validCombination}
+						disabled={errorsA.length > 0 || errorsB.length > 0 || !isSameAlphabet}
 					>Compare</button>
+					{
+						isSameAlphabet ? null :
+						<ul>
+							<li>Not the same alphabet.</li>
+						</ul>
+					}
 				</section>
 				{
 					this.state.steps == null ? null :

@@ -33,6 +33,8 @@ export class SubsetConstruction extends Component<{}, State> {
 	}
 
 	public render(): ReactNode {
+		const validation = Automata.validate(this.state.automata);
+		const errors = validation === true ? new Array<string>() : [...new Set<string>(validation.map(e => e.error))];
 		return (
 			<>
 				<section>
@@ -41,11 +43,24 @@ export class SubsetConstruction extends Component<{}, State> {
 					<TableAutomata automata={this.state.automata}
 						onChange={a => this.setState({ automata: a })}/>
 					<VisualAutomata automata={this.state.automata}/>
-					<p>
-						<button className="primary"
-							onClick={this.constructSubset.bind(this)}
-						>Construct Subset</button>
-					</p>
+					<br/>
+					<button
+						className="primary"
+						onClick={this.constructSubset.bind(this)}
+						disabled={errors.length > 0}
+					>
+						Construct Subset
+					</button>
+					{
+						errors.length === 0 ? null :
+						<ul>
+							{errors.map((e, i) =>
+								<li key={i}>
+									{e[0].toUpperCase() + e.substring(1)}.
+								</li>
+							)}
+						</ul>
+					}
 				</section>
 				{
 					this.state.steps.length === 0 ? null :

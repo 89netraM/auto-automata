@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { Automata, StateEquivalenceTable as StateEquivalenceTableType } from "auto-automata";
+import { Automata, Graph, StateEquivalenceTable as StateEquivalenceTableType } from "auto-automata";
 import { StateEquivalenceTable } from "../components/StateEquivalenceTable";
 import { TableAutomata } from "../components/TableAutomata";
 
@@ -44,6 +44,11 @@ export class AutomataStateEquivalence extends Component<{}, State> {
 	}
 
 	public render(): ReactNode {
+		const validation = Automata.validate(this.state.automata);
+		const errors = validation === true ? new Array<string>() : [...new Set<string>(validation.map(e => e.error))];
+		if (!Graph.isDFA(this.state.automata.states)) {
+			errors.unshift("automata is not a DFA");
+		}
 		return (
 			<>
 				<section>
@@ -57,8 +62,18 @@ export class AutomataStateEquivalence extends Component<{}, State> {
 					<button
 						className="primary"
 						onClick={this.makeTable}
-						disabled={!this.state.isValid}
+						disabled={errors.length > 0}
 					>Compute Table</button>
+					{
+						errors.length === 0 ? null :
+						<ul>
+							{errors.map((e, i) =>
+								<li key={i}>
+									{e[0].toUpperCase() + e.substring(1)}.
+								</li>
+							)}
+						</ul>
+					}
 				</section>
 				{
 					this.state.steps == null ? null :

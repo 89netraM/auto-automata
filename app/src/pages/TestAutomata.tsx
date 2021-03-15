@@ -6,6 +6,7 @@ import { uuid } from "../utils";
 interface State {
 	automata: Automata;
 	strings: Array<[string, string, boolean]>;
+	newString: [string, boolean];
 }
 
 export class TestAutomata extends Component<{}, State> {
@@ -20,35 +21,46 @@ export class TestAutomata extends Component<{}, State> {
 				alphabet: new Set<string>(),
 			},
 			strings: new Array<[string, string, boolean]>(),
+			newString: ["", false],
 		};
 	}
 
 	private updateAutomata(a: Automata): void {
+		const isValid = Automata.validate(a) === true;
 		this.setState({
 			automata: a,
-			strings: this.state.strings.map(([id, string, _]) => [id, string, Automata.test(a, string)]),
+			strings: this.state.strings.map(([id, string, _]) => [id, string, isValid && Automata.test(a, string)]),
+			newString: [this.state.newString[0], isValid && Automata.test(a, this.state.newString[0])],
 		});
 	}
 
-	private addString(input: HTMLInputElement): void {
-		const string = input.value;
-		if (string != null && string.length > 0) {
+	private addString(): void {
+		const isValid = Automata.validate(this.state.automata) === true;
+		if (this.state.newString[0].length > 0) {
 			this.setState({
 				strings: [
 					...this.state.strings,
-					[uuid(), string, Automata.test(this.state.automata, string)]
-				]
+					[uuid(), this.state.newString[0], this.state.newString[1]]
+				],
+				newString: ["", isValid && Automata.test(this.state.automata, "")],
 			});
-			input.value = "";
 		}
 	}
 
 	private updateString(id: string, string: string): void {
+		const isValid = Automata.validate(this.state.automata) === true;
 		this.setState({
 			strings: this.state.strings .map(([i, s, included]) => i === id ?
-				[id, string, Automata.test(this.state.automata, string)] :
+				[id, string, isValid && Automata.test(this.state.automata, string)] :
 				[i, s, included]
 			),
+		});
+	}
+
+	private updateNewString(string: string): void {
+		const isValid = Automata.validate(this.state.automata) === true;
+		this.setState({
+			newString: [string, isValid && Automata.test(this.state.automata, string)],
 		});
 	}
 
@@ -59,6 +71,8 @@ export class TestAutomata extends Component<{}, State> {
 	}
 
 	public render(): ReactNode {
+		const validation = Automata.validate(this.state.automata);
+		const errors = validation === true ? new Array<string>() : [...new Set<string>(validation.map(e => e.error))];
 		return (
 			<>
 				<section>
@@ -68,6 +82,16 @@ export class TestAutomata extends Component<{}, State> {
 						automata={this.state.automata}
 						onChange={a => this.updateAutomata(a)}
 					/>
+					{
+						errors.length === 0 ? null :
+						<ul>
+							{errors.map((e, i) =>
+								<li key={i}>
+									{e[0].toUpperCase() + e.substring(1)}.
+								</li>
+							)}
+						</ul>
+					}
 				</section>
 				<section>
 					<h3>Test strings</h3>
@@ -88,13 +112,18 @@ export class TestAutomata extends Component<{}, State> {
 							</p>
 						)
 					}
-					<input
-						type="text"
-						spellCheck={false}
-						placeholder="Add string"
-						onKeyPress={e => e.key === "Enter" && this.addString(e.currentTarget)}
-						onBlur={e => this.addString(e.currentTarget)}
-					/>
+					<div className="test-string">
+						<input
+							type="text"
+							spellCheck={false}
+							placeholder="Add string"
+							value={this.state.newString[0]}
+							onChange={e => this.updateNewString(e.target.value)}
+							onKeyPress={e => e.key === "Enter" && this.addString()}
+							onBlur={() => this.addString()}
+						/>
+						<span className={this.state.newString[1] ? "included" : "excluded"}/>
+					</div>
 				</section>
 			</>
 		);

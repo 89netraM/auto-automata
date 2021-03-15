@@ -38,6 +38,11 @@ export class AutomataToRegularExpression extends Component<{}, State> {
 	}
 
 	public render(): ReactNode {
+		const validation = Automata.validate(this.state.automata);
+		const errors = validation === true ? new Array<string>() : [...new Set<string>(validation.map(e => e.error))];
+		if (this.state.automata.accepting.size === 0) {
+			errors.push("no accepting states");
+		}
 		return (
 			<>
 				<section>
@@ -46,11 +51,24 @@ export class AutomataToRegularExpression extends Component<{}, State> {
 					<TableAutomata automata={this.state.automata}
 						onChange={a => this.setState({ automata: a })}/>
 					<VisualAutomata automata={this.state.automata}/>
-					<p>
-						<button className="primary"
-							onClick={this.convert.bind(this)}
-						>Convert</button>
-					</p>
+					<br/>
+					<button
+						className="primary"
+						onClick={this.convert.bind(this)}
+						disabled={errors.length > 0}
+					>
+						Convert
+					</button>
+					{
+						errors.length === 0 ? null :
+						<ul>
+							{errors.map((e, i) =>
+								<li key={i}>
+									{e[0].toUpperCase() + e.substring(1)}.
+								</li>
+							)}
+						</ul>
+					}
 				</section>
 				{
 					this.state.steps == null ? null :

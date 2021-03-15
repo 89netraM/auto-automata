@@ -1,5 +1,5 @@
 import React, { Component, ReactNode, KeyboardEvent } from "react";
-import { Automata, Graph } from "auto-automata";
+import { Automata, Graph, ValidatorError } from "auto-automata";
 import { sortBySymbolButFirst } from "../../../src/symbolHelpers";
 import { compareAutomatas, uuid } from "../utils";
 
@@ -27,6 +27,9 @@ enum CopyType {
 
 export class TableAutomata extends Component<Properties, State> {
 	private static automataToState(a: Automata): State {
+		const validation = Automata.validate(a);
+		const errors = validation === true ? new Array<ValidatorError>() : validation;
+
 		const alphabet = [...a.alphabet].sort();
 		if (Object.values(a.states).some(s => Graph.Epsilon in s)) {
 			alphabet.unshift(Graph.Epsilon);
@@ -41,7 +44,7 @@ export class TableAutomata extends Component<Properties, State> {
 						[...a.states[name][symbol]]
 							.sort(([x, _x], [y, _y]) => sortBySymbolButFirst(x, y, a.starting))
 							.join(", "),
-						true
+						!errors.some(({path}) => path[0] === "states" && path[1] === name && path[2] === symbol)
 					]);
 				}
 				else {
@@ -157,16 +160,11 @@ export class TableAutomata extends Component<Properties, State> {
 	}
 
 	private callOnChange(): void {
-		if (this.props.onChange != null && this.isAllValid()) {
+		if (this.props.onChange != null) {
 			this.props.onChange(
 				TableAutomata.stateToAutomata(this.state)
 			);
 		}
-	}
-	private isAllValid(): boolean {
-		return this.state.states.length === 0 ||
-			(this.state.states.some(s => s.starting) &&
-			this.state.states.every(state => state.transitions.every(([_, v]) => v)));
 	}
 
 	private async setStarting(name: string): Promise<void> {
@@ -382,7 +380,7 @@ export class TableAutomata extends Component<Properties, State> {
 			);
 		}
 
-		const missingStarting = this.state.states.length > 0 && !this.state.states.some(s => s.starting);
+		const missingStarting = !this.state.states.some(s => s.starting);
 
 		return (
 			<div>
