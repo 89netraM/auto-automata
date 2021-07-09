@@ -3,10 +3,6 @@
 $codeBackground: #0f0f0f;
 
 section {
-	> h1:first-child, h1, h2, h3, h4, h5, h6 {
-		padding-top: calc(#{$headerSize} + #{$distance});
-		margin-top: calc(#{-$headerSize} + #{-$distance});
-	}
 	h1, h2 {
 		padding-bottom: 0.25em;
 		margin-bottom: 0.5em;
@@ -41,17 +37,21 @@ section {
 	}
 
 	&.readme {
+		> h1:first-child, h1, h2, h3, h4, h5, h6 {
+			padding-top: calc(#{$headerSize} + #{$distance});
+			margin-top: calc(#{-$headerSize} + #{-$distance});
+		}
 		h1 {
 			font-size: 2rem;
 		}
 
 		ul {
 			padding: 0px;
-	
+
 			li {
 				padding-left: $distance * 0.5;
 				list-style: none;
-	
+
 				ul li {
 					padding-left: $distance * 1.5;
 				}
