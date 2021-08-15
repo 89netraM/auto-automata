@@ -2,13 +2,13 @@ import { RegularExpression } from "./RegularExpression";
 
 export class Reference extends RegularExpression {
 	public constructor(
-		public readonly name: string,
+		public readonly id: string,
 	) {
 		super();
 	}
 
 	public format(): string {
-		return this.name;
+		return this.id;
 	}
 
 	public run(string: string): Array<string> {
@@ -20,10 +20,14 @@ export class Reference extends RegularExpression {
 	public equals(other: RegularExpression): boolean {
 		return other instanceof Reference &&
 			// e = e
-			this.name === other.name;
+			this.id === other.id;
 	}
 
 	public isEmpty(): boolean {
 		return false;
+	}
+
+	protected name(): string {
+		return RegularExpression.ReferenceName;
 	}
 }

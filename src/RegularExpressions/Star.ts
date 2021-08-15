@@ -68,9 +68,9 @@ export class Star extends RegularExpression {
 		return new Array<string>(...seen);
 	}
 
-	public replace(name: string, exp: RegularExpression): RegularExpression {
+	public replace(id: string, exp: RegularExpression): RegularExpression {
 		return new Star(
-			this.exp.replace(name, exp),
+			this.exp.replace(id, exp),
 		);
 	}
 
@@ -86,5 +86,9 @@ export class Star extends RegularExpression {
 
 	public isEmpty(): boolean {
 		return false;
+	}
+
+	protected name(): string {
+		return RegularExpression.StarName;
 	}
 }

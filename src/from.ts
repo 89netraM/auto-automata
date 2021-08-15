@@ -155,7 +155,7 @@ export function fromRegularExpression(regularExpression: RegularExpression, step
 		}
 		else if (exp instanceof Reference) {
 			setState(start, {
-				[exp.name]: new Set([end]),
+				[exp.id]: new Set([end]),
 			});
 		}
 	};

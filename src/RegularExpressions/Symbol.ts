@@ -29,4 +29,8 @@ export class Symbol extends RegularExpression {
 	public isEmpty(): boolean {
 		return false;
 	}
+
+	protected name(): string {
+		return RegularExpression.SymbolName;
+	}
 }

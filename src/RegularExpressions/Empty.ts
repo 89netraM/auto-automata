@@ -24,4 +24,8 @@ export class Empty extends RegularExpression {
 	public isEmpty(): boolean {
 		return true;
 	}
+
+	protected name(): string {
+		return RegularExpression.EmptyName;
+	}
 }

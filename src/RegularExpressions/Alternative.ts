@@ -144,14 +144,14 @@ export class Alternative extends RegularExpression {
 		return this.left.run(string).concat(this.right.run(string));
 	}
 
-	public replace(name: string, exp: RegularExpression): RegularExpression {
-		let left = this.left.replace(name, exp);
-		let right = this.right.replace(name, exp);
+	public replace(id: string, exp: RegularExpression): RegularExpression {
+		let left = this.left.replace(id, exp);
+		let right = this.right.replace(id, exp);
 
-		if (left instanceof Reference && left.name === name) {
+		if (left instanceof Reference && left.id === id) {
 			left = exp;
 		}
-		if (right instanceof Reference && right.name === name) {
+		if (right instanceof Reference && right.id === id) {
 			right = exp;
 		}
 
@@ -188,5 +188,9 @@ export class Alternative extends RegularExpression {
 
 	public isEmpty(): boolean {
 		return this.left.isEmpty() && this.right.isEmpty();
+	}
+
+	protected name(): string {
+		return RegularExpression.AlternativeName;
 	}
 }

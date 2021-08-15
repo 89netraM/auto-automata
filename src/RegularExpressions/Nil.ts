@@ -24,4 +24,8 @@ export class Nil extends RegularExpression {
 	public isEmpty(): boolean {
 		return false;
 	}
+
+	protected name(): string {
+		return RegularExpression.NilName;
+	}
 }
