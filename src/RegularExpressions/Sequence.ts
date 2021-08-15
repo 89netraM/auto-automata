@@ -55,7 +55,7 @@ export class Sequence extends RegularExpression {
 
 	public format(): string {
 		const left = this.left.precedence() < this.precedence() ? "(" + this.left.format() + ")" : this.left.format();
-		const right = this.right.precedence() <= this.precedence() ? "(" + this.right.format() + ")" : this.right.format();
+		const right = this.right.precedence() < this.precedence() ? "(" + this.right.format() + ")" : this.right.format();
 		return left + right;
 	}
 
