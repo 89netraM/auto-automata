@@ -50,7 +50,7 @@ module.exports = {
 		new HtmlPlugin({
 			template: path.resolve(__dirname, "index.html"),
 			title: "Auto Automata",
-			base: "./"
+			base: "/auto-automata/"
 		}),
 		new CopyPlugin({
 			patterns: [
